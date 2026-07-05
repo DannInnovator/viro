@@ -288,8 +288,8 @@ function iniciarNodo(nodo) {
 
         // Coordenadas exactas mapeadas de tu hoja enemies.png
         if (nodo.tipo === "👑 JEFE CEREBRO") enemigosActivos = [new Personaje("NÚCLEO CENTRAL", 250, 24, 6, "agresivo", "-8px -395px", "", "Ninguno", "enemies.png")];
-        else if (nodo.tipo === "⚔️ Linfocito") enemigosActivos = [new Personaje("Linfocito T", 80, 20, 11, "agresivo", "-8px -210px", "", "Linfocito", "enemies.png")];
-        else if (nodo.tipo === "❓ Evento") enemigosActivos = [new Personaje("Glóbulo Mutado", 55, 12, 4, "agresivo", "-8px -555px", "", "Celula", "enemies.png")];
+        else if (nodo.tipo === "⚔️ Linfocito") enemigosActivos = [new Personaje("Linfocito T", 80, 20, 11, "agresivo", "-8px -220px", "", "Linfocito", "enemies.png")];
+        else if (nodo.tipo === "❓ Evento") enemigosActivos = [new Personaje("Glóbulo Mutado", 55, 12, 4, "agresivo", "-8px -575px", "", "Celula", "enemies.png")];
         else enemigosActivos = [new Personaje("Célula Epitelial", 70, 15, 8, "agresivo", "-8px -40px", "", "Celula", "enemies.png")];
 
         if (miEquipoGlobal[0].nombre === "Cepa Caparazón" && miEquipoGlobal[0].estaVivo()) {
