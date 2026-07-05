@@ -1,5 +1,5 @@
 class Personaje {
-    constructor(nombre, vidaMax, daño, velocidad, tipoEfecto, emoji, desc, tipoBiologico) {
+    constructor(nombre, vidaMax, daño, velocidad, tipoEfecto, bgPos, desc, tipoBiologico, spriteSheet) {
         this.nombre = nombre;
         this.vidaMax = vidaMax;
         this.vidaActual = vidaMax;
@@ -7,9 +7,10 @@ class Personaje {
         this.velocidadBase = velocidad;
         this.velocidad = velocidad;
         this.tipoEfecto = tipoEfecto; 
-        this.emoji = emoji;
+        this.bgPos = bgPos; // Coordenadas de recorte CSS (X e Y)
         this.desc = desc;
-        this.tipoBiologico = tipoBiologico; // 'Revestimiento' o 'Litico'
+        this.tipoBiologico = tipoBiologico; 
+        this.spriteSheet = spriteSheet; // 'alfa.png' o 'enemies.png'
         this.escudo = 0;
     }
     
@@ -19,11 +20,11 @@ class Personaje {
         if (this.escudo > 0) {
             if (cantidad <= this.escudo) { 
                 this.escudo -= cantidad; 
-                imprimir(`🛡️ El escudo de ${this.nombre} absorbió todo el impacto (${cantidad} de daño).`);
+                imprimir(`🛡️ El escudo de ${this.nombre} absorbió el impacto (${cantidad} dmg).`);
                 return; 
             } else { 
                 cantidad -= this.escudo; 
-                imprimir(`🛡️ El escudo de ${this.nombre} se rompió mitigando ${this.escudo} de daño.`);
+                imprimir(`🛡️ El escudo de ${this.nombre} se rompió absorbiendo ${this.escudo} dmg.`);
                 this.escudo = 0; 
             }
         }
@@ -37,45 +38,43 @@ class Personaje {
         let modAleatorio = 0.8 + (Math.random() * 0.4); 
         let dañoFinal = Math.floor(this.dañoBase * modAleatorio);
 
-        // Sistema de tipos eficaz/poco eficaz
         if (this.tipoBiologico === 'Revestimiento' && tipoCombate === '⚔️ Linfocito') {
             dañoFinal = Math.floor(dañoFinal * 1.5);
-            imprimir(`<span style='color: #00ff66;'>⭐ ¡TIPO EFECTIVO! El Revestimiento quiebra al Linfocito.</span>`);
+            imprimir(`<span style='color: #00ff66;'>⭐ ¡TIPO EFECTIVO! Caparazón tritura las defensas del Linfocito.</span>`);
         } else if (this.tipoBiologico === 'Revestimiento' && tipoCombate === '⚔️ Celula') {
             dañoFinal = Math.floor(dañoFinal * 0.7);
-            imprimir(`<span style='color: #ff3333;'>⚠️ Poco eficaz... El Revestimiento es pesado contra células comunas.</span>`);
+            imprimir(`<span style='color: #ff3333;'>⚠️ Poco eficaz... Caparazón se atasca en la pared celular.</span>`);
         } else if (this.tipoBiologico === 'Litico' && tipoCombate === '⚔️ Celula') {
             dañoFinal = Math.floor(dañoFinal * 1.5);
-            imprimir(`<span style='color: #00ff66;'>⭐ ¡TIPO EFECTIVO! El ARN-Lítico disuelve la célula.</span>`);
+            imprimir(`<span style='color: #00ff66;'>⭐ ¡TIPO EFECTIVO! Alfa inyecta sus ácidos en la célula.</span>`);
         } else if (this.tipoBiologico === 'Litico' && tipoCombate === '⚔️ Linfocito') {
             dañoFinal = Math.floor(dañoFinal * 0.7);
-            imprimir(`<span style='color: #ff3333;'>⚠️ Poco eficaz... El Linfocito bloquea los ácidos.</span>`);
+            imprimir(`<span style='color: #ff3333;'>⚠️ Poco eficaz... El Linfocito neutraliza el material lítico.</span>`);
         }
 
         if (this.tipoEfecto === 'agresivo') {
             if (this.escudo > 0) {
                 let bono = Math.floor(this.escudo * 0.5);
                 dañoFinal += bono;
-                imprimir(`🔥 <strong>¡Hermandad Viral!</strong> ${this.nombre} aprovecha el escudo: +${bono} daño.`);
+                imprimir(`🔥 <strong>¡Hermandad Viral!</strong> ${this.nombre} se sobrepotencia: +${bono} daño.`);
             }
             imprimir(`⚔️ <strong>${this.nombre}</strong> ataca:`);
             objetivo.recibirDaño(dañoFinal, imprimir);
         } 
         else if (this.tipoEfecto === 'tanque') {
-            imprimir(`🛡️ <strong>${this.nombre}</strong> golpea:`);
+            imprimir(`🛡️ <strong>${this.nombre}</strong> arremete firme:`);
             objetivo.recibirDaño(dañoFinal, imprimir);
             this.escudo = Math.floor(this.vidaActual * 0.25); 
             imprimir(`🛡️ ${this.nombre} regenera su barrera: +${this.escudo} de escudo.`);
 
             if (aliadoEnCola && aliadoEnCola.estaVivo()) {
                 aliadoEnCola.velocidad += 4;
-                imprimir(`⚡ <strong>Sinergia:</strong> ${aliadoEnCola.nombre} gana +4 de velocidad.`);
+                imprimir(`⚡ <strong>Sinergia:</strong> ${aliadoEnCola.nombre} se acelera (+4 Vel).`);
             }
         }
     }
 }
 
-// --- POOL DE MUTACIONES ---
 const LISTA_MUTACIONES = [
     { nombre: "🧬 Púas de Proteína", desc: "Aumenta el daño base de AMBAS cepas en +4.", efecto: () => { miEquipoGlobal.forEach(v => v.dañoBase += 4); } },
     { nombre: "🧪 Membrana de Titanio", desc: "Suma +30 HP de Vida Máxima a todo tu equipo.", efecto: () => { miEquipoGlobal.forEach(v => { v.vidaMax += 30; v.vidaActual += 30; }); } },
@@ -83,7 +82,6 @@ const LISTA_MUTACIONES = [
     { nombre: "💚 Regeneración Flash", desc: "Cura instantáneamente el 50% de la salud a todo el equipo.", efecto: () => { miEquipoGlobal.forEach(v => v.vidaActual = Math.min(v.vidaMax, v.vidaActual + Math.floor(v.vidaMax * 0.5))); } }
 ];
 
-// --- VARIABLES DE CONTROL ---
 let pisoActual = 0;
 let nodoActualId = null;
 let nodoTipoActual = ""; 
@@ -96,21 +94,29 @@ let intervaloCombate = null;
 const TIPOS_NODOS = ["⚔️ Celula", "⚔️ Linfocito", "❓ Evento", "🏪 Lab"];
 
 function inicializarEquipoJugador() {
+    // Definimos las coordenadas de recorte (X e Y) basándonos en la imagen alfa.png que pasaste
     miEquipoGlobal = [
-        new Personaje("Cepa Caparazón", 150, 9, 5, "tanque", "🛡️", "[Revestimiento] Fuerte vs Linfocitos. Empieza con escudo.", "Revestimiento"),
-        new Personaje("Cepa Alfa", 95, 26, 12, "agresivo", "🦠", "[Lítico] Fuerte vs Células comunes. Alto daño.", "Litico")
+        new Personaje("Cepa Caparazón", 150, 9, 5, "tanque", "-15px -15px", "[Revestimiento] Fuerte vs Linfocitos.", "Revestimiento", "alfa.png"),
+        new Personaje("Cepa Alfa", 95, 26, 12, "agresivo", "-15px -525px", "[Lítico] Fuerte vs Células comunes.", "Litico", "alfa.png")
     ];
     actualizarInterfazGestionEquipo();
 }
 
 function actualizarInterfazGestionEquipo() {
     if (miEquipoGlobal.length < 2) return;
-    document.getElementById("slot-0-emoji").innerText = miEquipoGlobal[0].emoji;
+    
+    // Asignar nombres y descripciones en la interfaz de gestión
     document.getElementById("slot-0-nombre").innerText = miEquipoGlobal[0].nombre;
     document.getElementById("slot-0-desc").innerText = miEquipoGlobal[0].desc;
-    document.getElementById("slot-1-emoji").innerText = miEquipoGlobal[1].emoji;
+    let s0 = document.getElementById("slot-0-sprite");
+    s0.style.backgroundImage = `url('${miEquipoGlobal[0].spriteSheet}')`;
+    s0.style.backgroundPosition = miEquipoGlobal[0].bgPos;
+
     document.getElementById("slot-1-nombre").innerText = miEquipoGlobal[1].nombre;
     document.getElementById("slot-1-desc").innerText = miEquipoGlobal[1].desc;
+    let s1 = document.getElementById("slot-1-sprite");
+    s1.style.backgroundImage = `url('${miEquipoGlobal[1].spriteSheet}')`;
+    s1.style.backgroundPosition = miEquipoGlobal[1].bgPos;
 }
 
 document.getElementById("btn-invertir-orden").addEventListener("click", () => {
@@ -125,10 +131,16 @@ function actualizarInterfazVisual() {
     let virus = virusVivos[0]; 
     let enemigo = enemigosActivos[0];
 
+    // Renderizar tarjeta del Virus con su Sprite Real de la hoja
+    let vSprite = document.getElementById("virus-render-sprite");
     if (virus) {
         document.getElementById("virus-nombre").innerText = virus.nombre;
-        document.getElementById("card-virus").querySelector(".actor-emoji").innerText = virus.emoji;
         document.getElementById("virus-stats").innerText = `HP: ${virus.vidaActual}/${virus.vidaMax} | Escudo: ${virus.escudo}`;
+        
+        vSprite.style.display = "block";
+        vSprite.style.backgroundImage = `url('${virus.spriteSheet}')`;
+        vSprite.style.backgroundPosition = virus.bgPos;
+
         let pctVida = (virus.vidaActual / virus.vidaMax) * 100;
         document.getElementById("virus-bar").style.width = `${pctVida}%`;
         let pctEscudo = Math.min(100, (virus.escudo / virus.vidaMax) * 100);
@@ -137,18 +149,25 @@ function actualizarInterfazVisual() {
         document.getElementById("virus-nombre").innerText = "Extinto";
         document.getElementById("virus-bar").style.width = `0%`;
         document.getElementById("virus-shield-bar").style.width = `0%`;
-        document.getElementById("virus-stats").innerText = "HP: 0/0";
+        vSprite.style.display = "none";
     }
 
+    // Renderizar tarjeta del Enemigo con su Sprite Real de la hoja enemies.png
+    let eSprite = document.getElementById("enemigo-render-sprite");
     if (enemigo) {
         document.getElementById("enemigo-nombre").innerText = enemigo.nombre;
-        document.getElementById("card-enemigo").querySelector(".actor-emoji").innerText = enemigo.emoji; // ERROR REPARADO AQUÍ CORRECTAMENTE
         document.getElementById("enemigo-stats").innerText = `HP: ${enemigo.vidaActual}/${enemigo.vidaMax}`;
+        
+        eSprite.style.display = "block";
+        eSprite.style.backgroundImage = `url('${enemigo.spriteSheet}')`;
+        eSprite.style.backgroundPosition = enemigo.bgPos;
+
         let pctVidaEnemigo = (enemigo.vidaActual / enemigo.vidaMax) * 100;
         document.getElementById("enemigo-bar").style.width = `${pctVidaEnemigo}%`;
     } else {
         document.getElementById("enemigo-nombre").innerText = "Destruido";
         document.getElementById("enemigo-bar").style.width = `0%`;
+        eSprite.style.display = "none";
     }
 }
 
@@ -243,14 +262,15 @@ function iniciarNodo(nodo) {
         btn3x.disabled = false;
         btnSalir.classList.add("hidden");
 
-        if (nodo.tipo === "👑 JEFE CEREBRO") enemigosActivos = [new Personaje("NÚCLEO CENTRAL", 250, 24, 6, "agresivo", "🧠", "", "Ninguno")];
-        else if (nodo.tipo === "⚔️ Linfocito") enemigosActivos = [new Personaje("Linfocito T", 80, 20, 11, "agresivo", "🏹", "", "Linfocito")];
-        else if (nodo.tipo === "❓ Evento") enemigosActivos = [new Personaje("Glóbulo Mutado", 55, 12, 4, "agresivo", "☣️", "", "Celula")];
-        else enemigosActivos = [new Personaje("Célula Epitelial", 70, 15, 8, "agresivo", "⚪", "", "Celula")];
+        // Coordenadas exactas mapeadas de tu hoja enemies.png
+        if (nodo.tipo === "👑 JEFE CEREBRO") enemigosActivos = [new Personaje("NÚCLEO CENTRAL", 250, 24, 6, "agresivo", "-10px -550px", "", "Ninguno", "enemies.png")];
+        else if (nodo.tipo === "⚔️ Linfocito") enemigosActivos = [new Personaje("Linfocito T", 80, 20, 11, "agresivo", "-10px -280px", "", "Linfocito", "enemies.png")];
+        else if (nodo.tipo === "❓ Evento") enemigosActivos = [new Personaje("Glóbulo Mutado", 55, 12, 4, "agresivo", "-400px -20px", "", "Celula", "enemies.png")];
+        else enemigosActivos = [new Personaje("Célula Epitelial", 70, 15, 8, "agresivo", "-10px -20px", "", "Celula", "enemies.png")];
 
         if (miEquipoGlobal[0].nombre === "Cepa Caparazón" && miEquipoGlobal[0].estaVivo()) {
             miEquipoGlobal[0].escudo = 40;
-            consola.innerHTML += `<p style='color: #58a6ff;'>🛡️ <strong>Pasiva de Entrada:</strong> Cepa Caparazón despliega blindaje pre-combate (+40 Escudo).</p>`;
+            consola.innerHTML += `<p style='color: #58a6ff;'>🛡️ <strong>Pasiva de Entrada:</strong> Desplegando blindaje pre-combate (+40 Escudo).</p>`;
         }
 
         actualizarInterfazVisual();

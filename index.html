@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viro.bee - Gestión de Cepas</title>
+    <title>Viro.bee - Edición Gráfica</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,16 +18,16 @@
                 <div class="team-slots">
                     <div class="slot-card" id="slot-0">
                         <span class="slot-pos">1º (Frente)</span>
-                        <div class="slot-emoji" id="slot-0-emoji">🛡️</div>
+                        <div class="slot-sprite-container"><div class="slot-sprite" id="slot-0-sprite"></div></div>
                         <div class="slot-name" id="slot-0-nombre">Tanque</div>
-                        <div class="slot-desc" id="slot-0-desc">Genera escudo.</div>
+                        <div class="slot-desc" id="slot-0-desc">Cargando...</div>
                     </div>
                     <div class="slot-arrow">➔</div>
                     <div class="slot-card" id="slot-1">
                         <span class="slot-pos">2º (Retaguardia)</span>
-                        <div class="slot-emoji" id="slot-1-emoji">🦠</div>
+                        <div class="slot-sprite-container"><div class="slot-sprite" id="slot-1-sprite"></div></div>
                         <div class="slot-name" id="slot-1-nombre">Alfa</div>
-                        <div class="slot-desc" id="slot-1-desc">Pega más fuerte por cada escudo aliado.</div>
+                        <div class="slot-desc" id="slot-1-desc">Cargando...</div>
                     </div>
                 </div>
                 <button id="btn-invertir-orden" style="margin-top: 15px; background-color: #1f6feb; padding: 8px 16px; font-size: 0.85rem;">🔄 CAMBIAR ORDEN DE FILA</button>
@@ -48,7 +48,7 @@
 
                 <div class="battle-display">
                     <div class="actor-card" id="card-virus">
-                        <div class="actor-emoji">🦠</div>
+                        <div class="sprite-container-arena"><div class="sprite-battle" id="virus-render-sprite"></div></div>
                         <div class="actor-name" id="virus-nombre">Cepa...</div>
                         <div class="health-bar-container">
                             <div class="health-bar" id="virus-bar"></div>
@@ -56,13 +56,14 @@
                         </div>
                         <div class="actor-stats" id="virus-stats">HP: 0/0</div>
                     </div>
+                    
                     <div class="versus">VS</div>
+                    
                     <div class="actor-card" id="card-enemigo">
-                        <div class="actor-emoji">🛡️</div>
+                        <div class="sprite-container-arena"><div class="sprite-battle" id="enemigo-render-sprite"></div></div>
                         <div class="actor-name" id="enemigo-nombre">Célula...</div>
                         <div class="health-bar-container">
                             <div class="health-bar" id="enemigo-bar"></div>
-                            <div class="shield-bar" id="enemigo-shield-bar"></div>
                         </div>
                         <div class="actor-stats" id="enemigo-stats">HP: 0/0</div>
                     </div>

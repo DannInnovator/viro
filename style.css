@@ -9,94 +9,92 @@ body {
     margin: 0;
 }
 
-.game-container {
-    width: 95%;
-    max-width: 700px;
-    text-align: center;
-    padding: 10px;
-}
-
+.game-container { width: 95%; max-width: 700px; text-align: center; padding: 10px; }
 h1 { color: #00ff66; margin: 5px 0; text-shadow: 0 0 10px rgba(0, 255, 102, 0.3); }
 .subtitle { color: #8b949e; font-size: 0.9rem; margin-bottom: 15px; }
 .screen { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; }
 .hidden { display: none !important; }
 
-/* Estilos del Mapa */
-.map-grid { display: flex; flex-direction: column-reverse; gap: 12px; margin-top: 15px; background: #05070a; padding: 15px; border-radius: 6px; }
-.map-row { display: flex; justify-content: space-around; padding: 8px 0; border-bottom: 1px dashed #21262d; }
-.nodo-btn { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; }
-.nodo-btn.disponible { border-color: #00ff66; color: #00ff66; box-shadow: 0 0 8px rgba(0,255,102,0.2); }
-.nodo-btn:disabled { opacity: 0.2; }
+/* --- MAP BACKGROUND (Usa el Tile B Microscopic generado) --- */
+.map-grid { 
+    display: flex; 
+    flex-direction: column-reverse; 
+    gap: 15px; 
+    margin-top: 15px; 
+    background-image: url('maps.png');
+    background-position: 250px 0; /* Centra la textura microscopic tile B de tu hoja */
+    border: 2px solid #30363d;
+    padding: 25px; 
+    border-radius: 8px; 
+}
 
-/* Controles e Interfaz de Combate */
+.map-row { display: flex; justify-content: space-around; padding: 8px 0; }
+
+/* Botones de Nodo con Iconos personalizados desde la hoja */
+.nodo-btn { 
+    background-color: #0a0d14; 
+    color: #c9d1d9; 
+    border: 2px solid #30363d; 
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    font-family: inherit;
+    font-size: 0.8rem;
+}
+.nodo-btn.disponible { border-color: #00ff66; color: #00ff66; box-shadow: 0 0 12px rgba(0,255,102,0.3); }
+.nodo-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Controles de Combate */
 .controles-combate { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-.btn-battle { background-color: #238636; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-.btn-battle-fast { background-color: #8957e5; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+.btn-battle { background-color: #238636; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: inherit; }
+.btn-battle-fast { background-color: #8957e5; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: inherit; }
 button:disabled { background-color: #30363d !important; color: #8b949e; cursor: not-allowed; }
 
-/* --- SECCIÓN VISUAL DE ENFRENTAMIENTO --- */
-.battle-display {
+/* Gestión de Equipo */
+.team-management { background: #0a0d14; border: 1px solid #21262d; border-radius: 8px; padding: 15px; }
+.team-management h4 { margin-top: 0; color: #58a6ff; font-size: 0.9rem; }
+.team-slots { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
+.slot-card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 12px; width: 42%; text-align: center; position: relative; }
+.slot-pos { position: absolute; top: -8px; left: 10px; background: #21262d; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; color: #8b949e; border: 1px solid #30363d;}
+.slot-desc { font-size: 0.7rem; color: #8b949e; margin-top: 6px; line-height: 1.3; }
+.slot-arrow { font-weight: bold; color: #238636; }
+
+/* --- CONTENEDORES DE RECORTE DE SPRITES (SPRITE SHEETS) --- */
+.slot-sprite-container, .sprite-container-arena {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    background: #0a0d14;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #21262d;
-    margin-bottom: 15px;
-}
-
-.actor-card {
-    width: 42%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.actor-emoji { font-size: 2.5rem; margin-bottom: 5px; }
-.actor-name { font-weight: bold; font-size: 1rem; color: #fff; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-
-/* Contenedores de Barras */
-.health-bar-container {
-    width: 100%;
-    background-color: #21262d;
-    height: 14px;
-    border-radius: 4px;
     overflow: hidden;
-    position: relative;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-    margin-bottom: 5px;
 }
 
-.health-bar {
-    background-color: #00ff66;
-    height: 100%;
-    width: 100%; /* Se encoge con JS */
-    transition: width 0.3s ease-in-out;
+/* Tamaño de las miniaturas en el menú del mapa */
+.slot-sprite {
+    width: 110px;
+    height: 110px;
+    background-image: url('alfa.png');
+    background-repeat: no-repeat;
+    image-rendering: pixelated; /* Evita que el pixel art se vuelva borroso */
 }
 
-.shield-bar {
-    background-color: #58a6ff;
-    height: 4px;
-    width: 0%; /* Crece con JS */
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    transition: width 0.2s ease;
+/* Tamaño de los sprites grandes en plena batalla */
+.sprite-battle {
+    width: 140px;
+    height: 140px;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
 }
 
-.actor-stats { font-size: 0.8rem; color: #8b949e; }
+/* Arena Frente a Frente */
+.battle-display { display: flex; justify-content: space-between; align-items: center; background: #0a0d14; padding: 20px; border-radius: 8px; border: 1px solid #21262d; margin-bottom: 15px; }
+.actor-card { width: 44%; display: flex; flex-direction: column; align-items: center; }
+.actor-name { font-weight: bold; font-size: 0.95rem; color: #fff; margin-top: 8px; margin-bottom: 6px; }
+
+/* Barras de Salud */
+.health-bar-container { width: 100%; background-color: #21262d; height: 14px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); margin-bottom: 5px; }
+.health-bar { background-color: #00ff66; height: 100%; width: 100%; transition: width 0.3s ease-in-out; }
+.shield-bar { background-color: #58a6ff; height: 4px; width: 0%; position: absolute; bottom: 0; left: 0; transition: width 0.2s ease; }
+.actor-stats { font-size: 0.75rem; color: #8b949e; }
 .versus { font-weight: bold; font-size: 1.2rem; color: #ff3333; }
 
-/* Historial reducido */
-.console-box-mini {
-    background-color: #05070a;
-    border: 1px solid #21262d;
-    border-radius: 4px;
-    padding: 10px;
-    height: 120px;
-    overflow-y: auto;
-    text-align: left;
-    font-size: 0.8rem;
-    color: #8b949e;
-}
+.console-box-mini { background-color: #05070a; border: 1px solid #21262d; border-radius: 4px; padding: 10px; height: 110px; overflow-y: auto; text-align: left; font-size: 0.8rem; color: #8b949e; }
