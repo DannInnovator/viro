@@ -1,0 +1,70 @@
+body {
+    background-color: #0d1117;
+    color: #c9d1d9;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.game-container {
+    width: 90%;
+    max-width: 650px;
+    text-align: center;
+}
+
+h1 {
+    color: #00ff66;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+}
+
+.subtitle {
+    color: #8b949e;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.battle-arena {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 20px;
+}
+
+button {
+    background-color: #238636;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    font-family: inherit;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: background 0.2s;
+}
+
+button:hover {
+    background-color: #2ea44f;
+}
+
+.console-box {
+    background-color: #05070a;
+    border: 1px solid #21262d;
+    border-radius: 4px;
+    margin-top: 20px;
+    padding: 15px;
+    height: 350px;
+    overflow-y: auto;
+    text-align: left;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.system-msg {
+    color: #58a6ff;
+}
