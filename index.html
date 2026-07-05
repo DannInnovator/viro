@@ -3,18 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viro.bee - MVP</title>
+    <title>Viro.bee - MVP con Mapa</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
         <h1>🦠 Viro.bee</h1>
-        <p class="subtitle">Simulador de Combate Roguelike (MVP)</p>
+        <p class="subtitle">Ecosistema de Juegos -bee</p>
         
-        <div class="battle-arena">
-            <button id="btn-infectar">⚡ INICIAR INFECCIÓN</button>
-            <div id="log-consola" class="console-box">
-                <p class="system-msg">> Presiona el botón para lanzar la plaga...</p>
+        <div id="pantalla-mapa" class="screen">
+            <h3>🗺️ Selecciona el siguiente tejido a infectar:</h3>
+            <div id="mapa-nodos" class="map-grid"></div>
+        </div>
+
+        <div id="pantalla-combate" class="screen hidden">
+            <div class="battle-arena">
+                <button id="btn-siguiente-turno">⏳ AVANZAR TURNO</button>
+                <div id="log-consola" class="console-box"></div>
             </div>
         </div>
     </div>
