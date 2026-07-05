@@ -1,4 +1,4 @@
-// --- CLASE PERSONAJE (IGUAL AL ANTERIOR) ---
+// --- CLASE PERSONAJE (MANTIENE LA LÓGICA BASE) ---
 class Personaje {
     constructor(nombre, vidaMax, daño, velocidad, tipoEfecto) {
         this.nombre = nombre;
@@ -30,29 +30,56 @@ class Personaje {
     }
 }
 
-// --- VARIABLES DE ESTADO DEL JUEGO ---
+// --- VARIABLES DE ESTADO ---
 let pisoActual = 0;
+let nodoActualId = null; // Guarda el ID del último nodo completado
 let mapaDatos = [];
 let miEquipo = [];
 let enemigosActivos = [];
 let turnoGlobal = 1;
+let intervaloCombate = null; // Controla el temporizador del Auto-Avance
 
-// --- GENERACIÓN DEL MAPA ALEATORIO ---
-const TIPOS_NODOS = ["⚔️ Celula", "⚔️ Linfocito", "❓ Evento", "🏪 Laboratorio"];
+const TIPOS_NODOS = ["⚔️ Celula", "⚔️ Linfocito", "❓ Evento", "🏪 Lab"];
 
+// --- GENERACIÓN DEL MAPA CON CONEXIONES REALES ---
 function generarMapa() {
     mapaDatos = [];
-    // Generamos 5 pisos de altura
+    pisoActual = 0;
+    nodoActualId = null;
+
+    // 1. Crear los nodos por cada uno de los 5 pisos
     for (let i = 0; i < 5; i++) {
         let nodosEnPiso = [];
-        // Cada piso tiene entre 2 y 3 caminos posibles aleatorios
-        let cantidadNodos = Math.floor(Math.random() * 2) + 2; 
+        let cantidadNodos = (i === 4) ? 1 : Math.floor(Math.random() * 2) + 2; // El último piso es 1 solo Jefe
+        
         for (let j = 0; j < cantidadNodos; j++) {
-            let tipoAleatorio = TIPOS_NODOS[Math.floor(Math.random() * TIPOS_NODOS.length)];
-            nodosEnPiso.push({ tipo: tipoAleatorio, id: `${i}-${j}`, piso: i });
+            let tipoAleatorio = (i === 4) ? "👑 JEFE CEREBRO" : TIPOS_NODOS[Math.floor(Math.random() * TIPOS_NODOS.length)];
+            nodosEnPiso.push({
+                tipo: tipoAleatorio,
+                id: `${i}-${j}`,
+                piso: i,
+                indice: j,
+                conexiones: [] // Guardará los índices de los nodos del piso SUPERIOR a los que se puede ir
+            });
         }
         mapaDatos.push(nodosEnPiso);
     }
+
+    // 2. Crear los caminos (Conexiones) entre pisos consecutivamente
+    for (let i = 0; i < mapaDatos.length - 1; i++) {
+        let pisoSiguiente = mapaDatos[i + 1];
+        mapaDatos[i].forEach(nodo => {
+            // Cada nodo se conecta al menos con el nodo que tiene encima directamente o uno cercano
+            let indexSiguienteOpcion = Math.min(nodo.indice, pisoSiguiente.length - 1);
+            nodo.conexiones.push(pisoSiguiente[indexSiguienteOpcion].id);
+            
+            // Un 50% de probabilidad de abrir un camino ramificado extra a los lados si existen
+            if (Math.random() > 0.5 && indexSiguienteOpcion + 1 < pisoSiguiente.length) {
+                nodo.conexiones.push(pisoSiguiente[indexSiguienteOpcion + 1].id);
+            }
+        });
+    }
+
     dibujarMapa();
 }
 
@@ -67,10 +94,24 @@ function dibujarMapa() {
         piso.forEach(nodo => {
             const btn = document.createElement("button");
             btn.className = "nodo-btn";
-            btn.innerText = nodo.tipo;
             
-            // Regla: Solo puedes clickear nodos del piso actual
-            if (nodo.piso === pisoActual) {
+            // Mostrar visualmente las rutas que abre este nodo
+            let textoConexiones = nodo.conexiones.length > 0 ? ` ➔ (${nodo.conexiones.map(c => c.split('-')[1]).join(',')})` : '';
+            btn.innerText = `${nodo.tipo}${textoConexiones}`;
+            
+            // REGLA DE CAMINO EXCLUSIVO:
+            let esDisponible = false;
+            if (pisoActual === 0 && nodo.piso === 0) {
+                esDisponible = true; // Primer piso: todos disponibles
+            } else if (nodo.piso === pisoActual && nodoActualId) {
+                // Pisos siguientes: solo si el nodo anterior guardaba conexión con este ID
+                let nodoAnterior = buscarNodoPorId(nodoActualId);
+                if (nodoAnterior && nodoAnterior.conexiones.includes(nodo.id)) {
+                    esDisponible = true;
+                }
+            }
+
+            if (esDisponible) {
                 btn.className += " disponible";
                 btn.onclick = () => iniciarNodo(nodo);
             } else {
@@ -82,35 +123,56 @@ function dibujarMapa() {
     });
 }
 
-// --- GESTIÓN DE PANTALLAS Y COMBATE ---
+function buscarNodoPorId(id) {
+    for (let piso of mapaDatos) {
+        let encontrado = piso.find(n => n.id === id);
+        if (encontrado) return encontrado;
+    }
+    return null;
+}
+
+// --- GESTIÓN DEL COMBATE ---
 function iniciarNodo(nodo) {
     document.getElementById("pantalla-mapa").className = "screen hidden";
     document.getElementById("pantalla-combate").className = "screen";
     
-    const consola = document.getElementById("log-consola");
-    consola.innerHTML = `<p class='system-msg' style='color:#0ff;'>🧬 Entrando a: ${nodo.tipo} (Piso ${nodo.piso + 1})</p>`;
+    // Guardamos qué nodo estamos jugando
+    nodoActualId = nodo.id;
 
-    // Preparar datos para este combate específico
+    const consola = document.getElementById("log-consola");
+    consola.innerHTML = `<p class='system-msg' style='color:#0ff;'>🧬 Invadiendo: ${nodo.tipo}</p>`;
+
     miEquipo = [
         new Personaje("Cepa Caparazón", 120, 5, 5, "tanque"),
         new Personaje("Cepa Alfa", 80, 22, 12, "agresivo")
     ];
 
-    enemigosActivos = nodo.tipo.includes("⚔️") 
-        ? [new Personaje(nodo.tipo.replace("⚔️ ", ""), 60, 12, 10, "agresivo")]
-        : [new Personaje("Célula Débil", 30, 5, 4, "agresivo")]; // Los eventos por ahora simulan combate fácil
-
+    enemigosActivos = [new Personaje(nodo.tipo.replace("⚔️ ", ""), 70, 14, 10, "agresivo")];
     turnoGlobal = 1;
+
+    // Cambiar texto del botón a modo automático
+    const btnTurno = document.getElementById("btn-siguiente-turno");
+    btnTurno.innerText = "⏳ AUTOMATIZAR INFECCIÓN (1s/turno)";
+    btnTurno.disabled = false;
 }
 
+// Evento del botón de avance
 document.getElementById("btn-siguiente-turno").addEventListener("click", () => {
+    // Si ya está corriendo un bucle, no creamos otro
+    if (intervaloCombate) return;
+
+    document.getElementById("btn-siguiente-turno").disabled = true;
+    
+    // Dispara el loop automático que corre CADA 1000 milisegundos (1 segundo)
+    intervaloCombate = setInterval(ejecutarUnTurno, 1000);
+});
+
+function ejecutarUnTurno() {
     const consola = document.getElementById("log-consola");
     function logGame(texto) {
         consola.innerHTML += `<p>${texto}</p>`;
         consola.scrollTop = consola.scrollHeight;
     }
-
-    if (miEquipo.length === 0 || enemigosActivos.length === 0) return;
 
     logGame(`<br><span style='color: #8b949e;'>[ TURNO ${turnoGlobal} ]</span>`);
     
@@ -122,36 +184,46 @@ document.getElementById("btn-siguiente-turno").addEventListener("click", () => {
         if (!luchador.estaVivo()) return;
         let obj = (luchador === virusFrente) ? enemigoFrente : virusFrente;
         luchador.ejecutarAccion(obj, logGame);
-        if (!obj.estaVivo()) logGame(`<span style='color: #ff3333;'>💀 ${obj.nombre} ha sido destruido.</span>`);
+        if (!obj.estaVivo()) logGame(`<span style='color: #ff3333;'>💀 ${obj.nombre} colapsó.</span>`);
     });
 
-    // Limpieza
     if (!virusFrente.estaVivo()) miEquipo.shift();
     if (!enemigoFrente.estaVivo()) enemigosActivos.shift();
 
     turnoGlobal++;
 
-    // Verificar si terminó la batalla
-    if (enemigosActivos.length === 0) {
-        logGame("<br><strong style='color: #00ff66;'>🏆 ¡Victoria en este nodo! Volviendo al mapa...</strong>");
-        pisoActual++; // Subimos un piso en el mapa general
-        setTimeout(volverAlMapa, 2500);
-    } else if (miEquipo.length === 0) {
-        logGame("<br><strong style='color: #ff3333;'>💀 GAME OVER. Tu plaga se extinguió. Reiniciando mapa...</strong>");
-        pisoActual = 0;
-        setTimeout(volverAlMapa, 3000);
+    // CONDICIONES DE PARADA (Fin del combate)
+    if (enemigosActivos.length === 0 || miEquipo.length === 0) {
+        clearInterval(intervaloCombate); // Detiene el reloj de 1 segundo
+        intervaloCombate = null;
+
+        if (enemigosActivos.length === 0) {
+            logGame("<br><strong style='color: #00ff66;'>🏆 ¡Ruta despejada! Avanzando en el mapa...</strong>");
+            pisoActual++; 
+            setTimeout(volverAlMapa, 2000);
+        } else {
+            logGame("<br><strong style='color: #ff3333;'>💀 PLANTA ELIMINADA. Reiniciando cepa...</strong>");
+            setTimeout(reiniciarJuegoTotal, 2500);
+        }
     }
-});
+}
 
 function volverAlMapa() {
     if (pisoActual >= 5) {
-        alert("¡Felicidades! Has infectado todo el órgano. ¡Victoria total en Viro.bee!");
-        pisoActual = 0;
+        alert("💥 ¡ÓRGANO TOTALMENTE DESTRUIDO! Victoria total en Viro.bee.");
+        reiniciarJuegoTotal();
+        return;
     }
+    document.getElementById("pantalla-combate").className = "screen hidden";
+    document.getElementById("pantalla-mapa").className = "screen";
+    dibujarMapa(); // Redibuja respetando las nuevas restricciones de camino
+}
+
+function reiniciarJuegoTotal() {
     document.getElementById("pantalla-combate").className = "screen hidden";
     document.getElementById("pantalla-mapa").className = "screen";
     generarMapa();
 }
 
-// Inicializar el juego por primera vez al cargar
+// Arrancar juego al cargar
 generarMapa();
