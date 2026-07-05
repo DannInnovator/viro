@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viro.bee - MVP Evolucionado</title>
+    <title>Viro.bee - Interfaz Visual</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,21 +11,45 @@
         <h1>🦠 Viro.bee</h1>
         <p class="subtitle">Ecosistema de Juegos -bee</p>
         
-        <!-- PANTALLA 1: EL MAPA DE INFECCIÓN -->
         <div id="pantalla-mapa" class="screen">
             <h3>🗺️ Selecciona el siguiente tejido a infectar:</h3>
             <div id="mapa-nodos" class="map-grid"></div>
         </div>
 
-        <!-- PANTALLA 2: LA ARENA DE COMBATE / EVENTOS -->
         <div id="pantalla-combate" class="screen hidden">
             <div class="battle-arena">
+                
                 <div class="controles-combate">
                     <button id="btn-velocidad-1x" class="btn-battle">⏳ AUTO 1X</button>
-                    <button id="btn-velocidad-3x" class="btn-battle-fast">⚡ AUTO 3X (Rápido)</button>
+                    <button id="btn-velocidad-3x" class="btn-battle-fast">⚡ AUTO 3X</button>
                     <button id="btn-salir-nodo" class="btn-battle hidden">➔ VOLVER AL MAPA</button>
                 </div>
-                <div id="log-consola" class="console-box"></div>
+
+                <div class="battle-display">
+                    <div class="actor-card" id="card-virus">
+                        <div class="actor-emoji">🦠</div>
+                        <div class="actor-name" id="virus-nombre">Cepa...</div>
+                        <div class="health-bar-container">
+                            <div class="health-bar" id="virus-bar"></div>
+                            <div class="shield-bar" id="virus-shield-bar"></div>
+                        </div>
+                        <div class="actor-stats" id="virus-stats">HP: 0/0</div>
+                    </div>
+
+                    <div class="versus">VS</div>
+
+                    <div class="actor-card" id="card-enemigo">
+                        <div class="actor-emoji">🛡️</div>
+                        <div class="actor-name" id="enemigo-nombre">Célula...</div>
+                        <div class="health-bar-container">
+                            <div class="health-bar" id="enemigo-bar"></div>
+                            <div class="shield-bar" id="enemigo-shield-bar"></div>
+                        </div>
+                        <div class="actor-stats" id="enemigo-stats">HP: 0/0</div>
+                    </div>
+                </div>
+
+                <div id="log-consola" class="console-box-mini"></div>
             </div>
         </div>
     </div>
