@@ -104,8 +104,8 @@ const TIPOS_NODOS = ["⚔️ Celula", "⚔️ Linfocito", "❓ Evento", "🏪 La
 function inicializarEquipoJugador() {
     // Coordenadas calculadas en base a la escala real de 800px de ancho en el menú
     miEquipoGlobal = [
-        new Personaje("Cepa Caparazón", 150, 9, 5, "tanque", "-10px -20px", "[Revestimiento] Fuerte vs Linfocitos.", "Revestimiento", "alfa.png"),
-        new Personaje("Cepa Alfa", 95, 26, 12, "agresivo", "-10px -365px", "[Lítico] Fuerte vs Células comunes.", "Litico", "alfa.png")
+        new Personaje("Cepa Caparazón", 150, 9, 5, "tanque", "-10px -40px", "[Revestimiento] Fuerte vs Linfocitos.", "Revestimiento", "alfa.png"),
+        new Personaje("Cepa Alfa", 95, 26, 12, "agresivo", "-10px -375px", "[Lítico] Fuerte vs Células comunes.", "Litico", "alfa.png")
     ];
     actualizarInterfazGestionEquipo();
 }
