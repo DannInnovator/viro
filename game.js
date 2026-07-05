@@ -105,7 +105,7 @@ function inicializarEquipoJugador() {
     // Coordenadas calculadas en base a la escala real de 800px de ancho en el menú
     miEquipoGlobal = [
         new Personaje("Cepa Caparazón", 150, 9, 5, "tanque", "-8px -40px", "[Revestimiento] Fuerte vs Linfocitos.", "Revestimiento", "alfa.png"),
-        new Personaje("Cepa Alfa", 95, 26, 12, "agresivo", "-8px -385px", "[Lítico] Fuerte vs Células comunes.", "Litico", "alfa.png")
+        new Personaje("Cepa Alfa", 95, 26, 12, "agresivo", "-8px -390px", "[Lítico] Fuerte vs Células comunes.", "Litico", "alfa.png")
     ];
     actualizarInterfazGestionEquipo();
 }
