@@ -22,7 +22,7 @@ class Personaje {
                 return; 
             } else { 
                 cantidad -= this.escudo; 
-                imprimir(`🛡️ El escudo de ${this.nombre} mitigó ${this.escudo} de daño antes de romperse.`);
+                imprimir(`🛡️ El escudo de ${this.nombre} se rompió absorbiendo parte del daño.`);
                 this.escudo = 0; 
             }
         }
@@ -37,12 +37,10 @@ class Personaje {
         let dañoFinal = Math.floor(this.dañoBase * mod);
 
         if (this.tipoEfecto === 'agresivo') {
-            // --- SINERGIA ALFA: Si hay un aliado vivo detrás y este virus (o el aliado previo) dejó escudo ---
-            // Revisamos si este virus tiene escudo activo para potenciar su ataque por hermandad
             if (this.escudo > 0) {
                 let bono = Math.floor(this.escudo * 0.5);
                 dañoFinal += bono;
-                imprimir(`🔥 <strong>¡SINERGIA VIRAL!</strong> ${this.nombre} se potencia con la defensa activa y suma +${bono} de daño elemental.`);
+                imprimir(`🔥 <strong>¡Hermandad Viral!</strong> ${this.nombre} se potencia con el escudo y suma +${bono} de daño.`);
             }
             imprimir(`⚔️ <strong>${this.nombre}</strong> ataca con fuerza:`);
             objetivo.recibirDaño(dañoFinal, imprimir);
@@ -50,31 +48,36 @@ class Personaje {
         else if (this.tipoEfecto === 'tanque') {
             imprimir(`🛡️ <strong>${this.nombre}</strong> golpea defensivamente:`);
             objetivo.recibirDaño(dañoFinal, imprimir);
-            
             this.escudo = Math.floor(this.vidaActual * 0.20); 
             imprimir(`🛡️ ${this.nombre} levanta una barrera celular de +${this.escudo} de escudo.`);
 
-            // --- SINERGIA TANQUE: Si hay otro virus vivo en la reserva detrás de él, le hereda velocidad ---
             if (aliadoEnCola && aliadoEnCola.estaVivo()) {
-                aliadoEnCola.velocidad += 3;
-                imprimir(`⚡ <strong>Sinergia de Colmena:</strong> La fricción del escudo acelera a ${aliadoEnCola.nombre} (+3 Velocidad para el turno).`);
+                aliadoEnCola.velocidad += 4;
+                imprimir(`⚡ <strong>Sinergia:</strong> ${this.nombre} acelera a ${aliadoEnCola.nombre} (+4 Vel).`);
             }
         }
     }
 }
 
+// --- POOL DE MUTACIONES (RECOMPENSAS) ---
+const LISTA_MUTACIONES = [
+    { nombre: "🧬 Púas de Proteína", desc: "Aumenta el daño base de AMBAS cepas en +4.", efecto: () => { miEquipoGlobal.forEach(v => v.dañoBase += 4); } },
+    { nombre: "🧪 Membrana de Titanio", desc: "Suma +30 HP de Vida Máxima a todo tu equipo.", efecto: () => { miEquipoGlobal.forEach(v => { v.vidaMax += 30; v.vidaActual += 30; }); } },
+    { nombre: "⚡ Flagelos Mutantes", desc: "Aumenta la velocidad base de tus virus en +3.", efecto: () => { miEquipoGlobal.forEach(v => { v.velocidadBase += 3; v.velocidad += 3; }); } },
+    { nombre: "💚 Regeneración Flash", desc: "Cura instantáneamente el 50% de la salud a todo el equipo.", efecto: () => { miEquipoGlobal.forEach(v => v.vidaActual = Math.min(v.vidaMax, v.vidaActual + Math.floor(v.vidaMax * 0.5))); } }
+];
+
 // --- VARIABLES DE CONTROL ---
 let pisoActual = 0;
 let nodoActualId = null;
 let mapaDatos = [];
-let miEquipoGlobal = []; // El inventario persistente del jugador
+let miEquipoGlobal = []; 
 let enemigosActivos = [];
 let turnoGlobal = 1;
 let intervaloCombate = null;
 
 const TIPOS_NODOS = ["⚔️ Celula", "⚔️ Linfocito", "❓ Evento", "🏪 Lab"];
 
-// Instanciamos los virus una sola vez al cargar la app
 function inicializarEquipoJugador() {
     miEquipoGlobal = [
         new Personaje("Cepa Caparazón", 130, 8, 5, "tanque", "🛡️", "Genera barreras y acelera al virus que viene detrás."),
@@ -83,22 +86,17 @@ function inicializarEquipoJugador() {
     actualizarInterfazGestionEquipo();
 }
 
-// Renderiza los virus arriba de la pantalla del mapa
 function actualizarInterfazGestionEquipo() {
     if (miEquipoGlobal.length < 2) return;
-    
     document.getElementById("slot-0-emoji").innerText = miEquipoGlobal[0].emoji;
     document.getElementById("slot-0-nombre").innerText = miEquipoGlobal[0].nombre;
     document.getElementById("slot-0-desc").innerText = miEquipoGlobal[0].desc;
-
     document.getElementById("slot-1-emoji").innerText = miEquipoGlobal[1].emoji;
     document.getElementById("slot-1-nombre").innerText = miEquipoGlobal[1].nombre;
     document.getElementById("slot-1-desc").innerText = miEquipoGlobal[1].desc;
 }
 
-// Botón para alterar la fila antes de entrar a combatir
 document.getElementById("btn-invertir-orden").addEventListener("click", () => {
-    // Intercambiamos posiciones en el array
     let temporal = miEquipoGlobal[0];
     miEquipoGlobal[0] = miEquipoGlobal[1];
     miEquipoGlobal[1] = temporal;
@@ -106,7 +104,8 @@ document.getElementById("btn-invertir-orden").addEventListener("click", () => {
 });
 
 function actualizarInterfazVisual() {
-    let virus = miEquipoGlobal[0]; // El primero vivo de la fila global peleando
+    let virusVivos = miEquipoGlobal.filter(v => v.estaVivo());
+    let virus = virusVivos[0]; // Muestra siempre al primero que esté vivo para la batalla
     let enemigo = enemigosActivos[0];
 
     if (virus) {
@@ -117,6 +116,11 @@ function actualizarInterfazVisual() {
         document.getElementById("virus-bar").style.width = `${pctVida}%`;
         let pctEscudo = Math.min(100, (virus.escudo / virus.vidaMax) * 100);
         document.getElementById("virus-shield-bar").style.width = `${pctEscudo}%`;
+    } else {
+        // Si no quedan virus vivos, vaciar tarjeta
+        document.getElementById("virus-nombre").innerText = "Extinto";
+        document.getElementById("virus-bar").style.width = `0%`;
+        document.getElementById("virus-stats").innerText = "HP: 0/0";
     }
 
     if (enemigo) {
@@ -125,6 +129,9 @@ function actualizarInterfazVisual() {
         document.getElementById("enemigo-stats").innerText = `HP: ${enemigo.vidaActual}/${enemigo.vidaMax}`;
         let pctVidaEnemigo = (enemigo.vidaActual / enemigo.vidaMax) * 100;
         document.getElementById("enemigo-bar").style.width = `${pctVidaEnemigo}%`;
+    } else {
+        document.getElementById("enemigo-nombre").innerText = "Destruido";
+        document.getElementById("enemigo-bar").style.width = `0%`;
     }
 }
 
@@ -183,8 +190,7 @@ function dibujarMapa() {
 function iniciarNodo(nodo) {
     document.getElementById("pantalla-mapa").className = "screen hidden";
     document.getElementById("pantalla-combate").className = "screen";
-    nodoActualId = nodo.id; 
-    turnoGlobal = 1;
+    nodoActualId = nodo.id; turnoGlobal = 1;
 
     const consola = document.getElementById("log-consola");
     consola.innerHTML = "";
@@ -194,7 +200,6 @@ function iniciarNodo(nodo) {
     const btn3x = document.getElementById("btn-velocidad-3x");
     const btnSalir = document.getElementById("btn-salir-nodo");
 
-    // Limpiar velocidades alteradas por sinergias previas al entrar a pelear
     miEquipoGlobal.forEach(v => v.velocidad = v.velocidadBase);
 
     if (nodo.tipo === "🏪 Lab") {
@@ -225,7 +230,7 @@ function iniciarNodo(nodo) {
         else enemigosActivos = [new Personaje("Célula Epitelial", 70, 16, 8, "agresivo", "⚪")];
 
         actualizarInterfazVisual();
-        consola.innerHTML = `<p class='system-msg' style='color:#58a6ff;'>🧬 Tejido hostil alcanzado. Desplegando cepas en orden...</p>`;
+        consola.innerHTML = `<p class='system-msg' style='color:#58a6ff;'>🧬 Entrando a zona hostil...</p>`;
     }
 }
 
@@ -243,18 +248,15 @@ function ejecutarUnTurno() {
     const consola = document.getElementById("log-consola");
     function logGame(texto) { consola.innerHTML += `<p>${texto}</p>`; consola.scrollTop = consola.scrollHeight; }
 
-    // Filtrar los virus vivos reales en este microsegundo
     let virusVivos = miEquipoGlobal.filter(v => v.estaVivo());
-
     if (virusVivos.length === 0 || enemigosActivos.length === 0) return;
 
     logGame(`<br><span style='color: #8b949e;'>[ TURNO ${turnoGlobal} ]</span>`);
     
     let virusFrente = virusVivos[0];
-    let virusReserva = virusVivos[1] || null; // El segundo en fila si existe
+    let virusReserva = virusVivos[1] || null;
     let enemigoFrente = enemigosActivos[0];
 
-    // Reset de escudo al inicio
     virusFrente.escudo = 0;
 
     let luchadores = [virusFrente, enemigoFrente].sort((a, b) => b.velocidad - a.velocidad);
@@ -262,24 +264,26 @@ function ejecutarUnTurno() {
     luchadores.forEach(luchador => {
         if (!luchador.estaVivo()) return;
         if (luchador === virusFrente) {
-            // Pasamos al aliado de reserva como segundo parámetro para activar las sinergias
             luchador.ejecutarAccion(enemigoFrente, virusReserva, logGame);
         } else {
             luchador.ejecutarAccion(virusFrente, null, logGame);
         }
+        
+        // --- 💥 CORRECCIÓN VISUAL CRÍTICA: Forzamos la actualización inmediata si el virus del frente colapsa en medio del turno ---
+        if (!virusFrente.estaVivo()) {
+            actualizarInterfazVisual(); 
+        }
     });
 
-    actualizarInterfazVisual();
-
     if (!virusFrente.estaVivo()) {
-        logGame(`<span style='color: #ff3333;'>💀 ${virusFrente.nombre} ha caído desintegrado.</span>`);
+        logGame(`<span style='color: #ff3333;'>💀 ${virusFrente.nombre} colapsó. Siguiente cepa al frente.</span>`);
     }
     if (!enemigoFrente.estaVivo()) {
-        logGame(`<span style='color: #ff3333;'>💀 ${enemigoFrente.nombre} ha sido destruido.</span>`);
+        logGame(`<span style='color: #ff3333;'>💀 ${enemigoFrente.nombre} desintegrado.</span>`);
         enemigosActivos.shift();
     }
 
-    // Actualizar referencia tras muertes
+    actualizarInterfazVisual(); // Refresco regular de fin de turno
     virusVivos = miEquipoGlobal.filter(v => v.estaVivo());
     turnoGlobal++;
 
@@ -288,13 +292,43 @@ function ejecutarUnTurno() {
         intervaloCombate = null;
 
         if (enemigosActivos.length === 0) {
-            logGame("<br><strong style='color: #00ff66;'>🏆 ¡Ruta asimilada!</strong>");
-            pisoActual++; setTimeout(volverAlMapa, 2000);
+            logGame("<br><strong style='color: #00ff66;'>🏆 ¡Combate ganado! Cargando mutaciones...</strong>");
+            setTimeout(mostrarPantallaRecompensas, 1500); // 🎁 En vez de ir al mapa, disparamos los premios
         } else {
             logGame("<br><strong style='color: #ff3333;'>💀 LA PLAGA FRACASÓ.</strong>");
             setTimeout(reiniciarJuegoTotal, 2500);
         }
     }
+}
+
+// --- 🎁 NUEVA FUNCIÓN: CONSTRUCCIÓN DINÁMICA DE LA PANTALLA DE RECOMPENSAS ---
+function mostrarPantallaRecompensas() {
+    const consola = document.getElementById("log-consola");
+    document.querySelector(".battle-display").style.display = "none"; // Ocultamos los combatientes
+
+    consola.innerHTML = `<h3 style='color: #8957e5;'>🎁 ¡MUTACIÓN ADQUIRIDA!</h3>
+    <p style='color: #8b949e; margin-bottom: 15px;'>Elige 1 de los siguientes mutágenos para alterar el genoma de tu plaga de forma permanente:</p>
+    <div id='contenedor-premios' style='display:flex; justify-content:space-around; gap:10px;'></div>`;
+
+    // Barajar y tomar 3 mutaciones aleatorias de nuestra lista
+    let mezcladas = [...LISTA_MUTACIONES].sort(() => 0.5 - Math.random());
+    let tresPremios = mezcladas.slice(0, 3);
+
+    const divContenedor = document.getElementById("contenedor-premios");
+
+    tresPremios.forEach(premio => {
+        const btnPremio = document.createElement("button");
+        btnPremio.style.cssText = "background:#1f2937; border:1px solid #8957e5; padding:12px; border-radius:6px; color:#fff; cursor:pointer; width:30%; font-size:0.75rem; font-family:inherit; display:flex; flex-direction:column; gap:5px;";
+        btnPremio.innerHTML = `<strong style='color:#8957e5;'>${premio.nombre}</strong><span>${premio.desc}</span>`;
+        
+        btnPremio.onclick = () => {
+            premio.efecto(); // Ejecuta el código de la mejora
+            alert(`¡Mutación aplicada con éxito!`);
+            pisoActual++;
+            volverAlMapa();
+        };
+        divContenedor.appendChild(btnPremio);
+    });
 }
 
 function volverAlMapa() {
