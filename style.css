@@ -105,7 +105,7 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
     background-repeat: no-repeat;
     image-rendering: pixelated;
     /* Escalamos de forma proporcional a la resolución real (Proporción aproximada para los slots) */
-    background-size: 800px 436px; 
+    background-size: 1300px 713px; 
     background-color: #161b22; 
     border-radius: 4px;
     border: 1px solid #30363d;
