@@ -103,23 +103,27 @@ document.getElementById("btn-invertir-orden").addEventListener("click", () => {
     actualizarInterfazGestionEquipo();
 });
 
+// --- 🛠️ CORRECCIÓN EN EL REFRESCO VISUAL ---
 function actualizarInterfazVisual() {
+    // Filtramos dinámicamente el equipo para agarrar siempre al primer virus vivo real en ESTE milisegundo
     let virusVivos = miEquipoGlobal.filter(v => v.estaVivo());
-    let virus = virusVivos[0]; // Muestra siempre al primero que esté vivo para la batalla
+    let virus = virusVivos[0]; 
     let enemigo = enemigosActivos[0];
 
     if (virus) {
         document.getElementById("virus-nombre").innerText = virus.nombre;
         document.getElementById("card-virus").querySelector(".actor-emoji").innerText = virus.emoji;
         document.getElementById("virus-stats").innerText = `HP: ${virus.vidaActual}/${virus.vidaMax} | Escudo: ${virus.escudo}`;
+        
         let pctVida = (virus.vidaActual / virus.vidaMax) * 100;
         document.getElementById("virus-bar").style.width = `${pctVida}%`;
+        
         let pctEscudo = Math.min(100, (virus.escudo / virus.vidaMax) * 100);
         document.getElementById("virus-shield-bar").style.width = `${pctEscudo}%`;
     } else {
-        // Si no quedan virus vivos, vaciar tarjeta
         document.getElementById("virus-nombre").innerText = "Extinto";
         document.getElementById("virus-bar").style.width = `0%`;
+        document.getElementById("virus-shield-bar").style.width = `0%`;
         document.getElementById("virus-stats").innerText = "HP: 0/0";
     }
 
@@ -132,6 +136,7 @@ function actualizarInterfazVisual() {
     } else {
         document.getElementById("enemigo-nombre").innerText = "Destruido";
         document.getElementById("enemigo-bar").style.width = `0%`;
+        document.getElementById("enemigo-stats").innerText = "HP: 0/0";
     }
 }
 
@@ -248,6 +253,7 @@ function ejecutarUnTurno() {
     const consola = document.getElementById("log-consola");
     function logGame(texto) { consola.innerHTML += `<p>${texto}</p>`; consola.scrollTop = consola.scrollHeight; }
 
+    // Evaluamos el equipo vivo al iniciar el tick de este turno
     let virusVivos = miEquipoGlobal.filter(v => v.estaVivo());
     if (virusVivos.length === 0 || enemigosActivos.length === 0) return;
 
@@ -262,14 +268,17 @@ function ejecutarUnTurno() {
     let luchadores = [virusFrente, enemigoFrente].sort((a, b) => b.velocidad - a.velocidad);
 
     luchadores.forEach(luchador => {
-        if (!luchador.estaVivo()) return;
+        if (!luchador.estaVivo() || !enemigoFrente.estaVivo()) return;
+        
         if (luchador === virusFrente) {
             luchador.ejecutarAccion(enemigoFrente, virusReserva, logGame);
         } else {
             luchador.ejecutarAccion(virusFrente, null, logGame);
         }
         
-        // --- 💥 CORRECCIÓN VISUAL CRÍTICA: Forzamos la actualización inmediata si el virus del frente colapsa en medio del turno ---
+        // --- PARCHE DE ASINCRONÍA ---
+        // Si el virus activo muere a mitad del turno, actualizamos la pantalla INMEDIATAMENTE
+        // para que dibuje al virus de reserva en el slot activo antes de continuar.
         if (!virusFrente.estaVivo()) {
             actualizarInterfazVisual(); 
         }
@@ -283,7 +292,10 @@ function ejecutarUnTurno() {
         enemigosActivos.shift();
     }
 
-    actualizarInterfazVisual(); // Refresco regular de fin de turno
+    // Refrescamos la interfaz completa
+    actualizarInterfazVisual(); 
+    
+    // Volvemos a evaluar el estado general para el cierre del turno
     virusVivos = miEquipoGlobal.filter(v => v.estaVivo());
     turnoGlobal++;
 
@@ -293,7 +305,7 @@ function ejecutarUnTurno() {
 
         if (enemigosActivos.length === 0) {
             logGame("<br><strong style='color: #00ff66;'>🏆 ¡Combate ganado! Cargando mutaciones...</strong>");
-            setTimeout(mostrarPantallaRecompensas, 1500); // 🎁 En vez de ir al mapa, disparamos los premios
+            setTimeout(mostrarPantallaRecompensas, 1500); 
         } else {
             logGame("<br><strong style='color: #ff3333;'>💀 LA PLAGA FRACASÓ.</strong>");
             setTimeout(reiniciarJuegoTotal, 2500);
@@ -301,16 +313,14 @@ function ejecutarUnTurno() {
     }
 }
 
-// --- 🎁 NUEVA FUNCIÓN: CONSTRUCCIÓN DINÁMICA DE LA PANTALLA DE RECOMPENSAS ---
 function mostrarPantallaRecompensas() {
     const consola = document.getElementById("log-consola");
-    document.querySelector(".battle-display").style.display = "none"; // Ocultamos los combatientes
+    document.querySelector(".battle-display").style.display = "none"; 
 
     consola.innerHTML = `<h3 style='color: #8957e5;'>🎁 ¡MUTACIÓN ADQUIRIDA!</h3>
     <p style='color: #8b949e; margin-bottom: 15px;'>Elige 1 de los siguientes mutágenos para alterar el genoma de tu plaga de forma permanente:</p>
     <div id='contenedor-premios' style='display:flex; justify-content:space-around; gap:10px;'></div>`;
 
-    // Barajar y tomar 3 mutaciones aleatorias de nuestra lista
     let mezcladas = [...LISTA_MUTACIONES].sort(() => 0.5 - Math.random());
     let tresPremios = mezcladas.slice(0, 3);
 
@@ -322,7 +332,7 @@ function mostrarPantallaRecompensas() {
         btnPremio.innerHTML = `<strong style='color:#8957e5;'>${premio.nombre}</strong><span>${premio.desc}</span>`;
         
         btnPremio.onclick = () => {
-            premio.efecto(); // Ejecuta el código de la mejora
+            premio.efecto(); 
             alert(`¡Mutación aplicada con éxito!`);
             pisoActual++;
             volverAlMapa();
