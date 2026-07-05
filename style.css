@@ -19,36 +19,61 @@ h1 { color: #00ff66; margin: 5px 0; text-shadow: 0 0 10px rgba(0, 255, 102, 0.3)
 .map-grid { 
     display: flex; 
     flex-direction: column-reverse; 
-    gap: 15px; 
+    gap: 20px; 
     margin-top: 15px; 
-    /* Quitamos la imagen gigante repetida de fondo para que no tape los botones */
-    background-color: #05070a; 
+    /* Fondo oscuro profundo con una cuadrícula sutil hecha por código CSS */
+    background-color: #070a12;
+    background-image: linear-gradient(#161b22 1px, transparent 1px), linear-gradient(90deg, #161b22 1px, transparent 1px);
+    background-size: 20px 20px;
     border: 2px solid #30363d;
-    padding: 25px; 
+    padding: 30px; 
     border-radius: 8px; 
+    position: relative;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+}
+
+.map-row { 
+    display: flex; 
+    justify-content: space-around; 
+    padding: 10px 0; 
     position: relative;
 }
 
-.map-row { display: flex; justify-content: space-around; padding: 8px 0; }
-
-/* Botones de Nodo con Iconos personalizados desde la hoja */
+/* Botones de Nodo Modernizados sin depender de imágenes externas */
 .nodo-btn { 
-    background-color: #0a0d14; 
-    color: #c9d1d9; 
-    border: 2px solid #30363d; 
-    padding: 10px 15px; 
-    border-radius: 8px; 
+    background-color: #0d1117; 
+    color: #8b949e; 
+    border: 2px solid #21262d; 
+    padding: 12px 20px; 
+    border-radius: 6px; 
     cursor: pointer; 
     font-weight: bold; 
     font-family: inherit;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 0.85rem;
+    transition: all 0.2s ease-in-out;
 }
 
-.nodo-btn.disponible { border-color: #00ff66; color: #00ff66; box-shadow: 0 0 12px rgba(0,255,102,0.3); }
-.nodo-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* Estilo para los nodos disponibles en el piso actual */
+.nodo-btn.disponible { 
+    border-color: #00ff66; 
+    color: #00ff66; 
+    background-color: #0a1c14;
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.25);
+}
+
+.nodo-btn.disponible:hover {
+    background-color: #00ff66;
+    color: #0d1117;
+    box-shadow: 0 0 20px rgba(0, 255, 102, 0.5);
+    transform: translateY(-2px);
+}
+
+.nodo-btn:disabled { 
+    opacity: 0.25; 
+    cursor: not-allowed;
+    border-color: #161b22;
+    background-color: #070a12;
+}
 
 /* Controles de Combate */
 .controles-combate { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
@@ -79,17 +104,22 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
     height: 100px;
     background-repeat: no-repeat;
     image-rendering: pixelated;
-    /* Escalamos la imagen general para poder controlar los cuadrantes de tu archivo alfa.png */
     background-size: 900px 900px; 
+    /* Truco: un color de fondo plano oculta la cuadrícula gris de la imagen */
+    background-color: #161b22; 
+    border-radius: 4px;
+    border: 1px solid #30363d;
 }
 
-/* Tamaño de los sprites grandes en plena batalla */
+/* Arena de Combate */
 .sprite-battle {
     width: 140px;
     height: 140px;
     background-repeat: no-repeat;
     image-rendering: pixelated;
     background-size: 1100px 1100px;
+    background-color: #0a0d14;
+    border-radius: 6px;
 }
 
 /* Arena Frente a Frente */

@@ -205,7 +205,9 @@ function dibujarMapa() {
         piso.forEach(nodo => {
             const btn = document.createElement("button");
             btn.className = "nodo-btn";
-            let textoConexiones = nodo.conexiones.length > 0 ? ` ➔ (${nodo.conexiones.map(c => c.split('-')[1]).join(',')})` : '';
+            
+            // Texto limpio con el formato de caminos relacionales
+            let textoConexiones = nodo.conexiones.length > 0 ? ` ➔ [${nodo.conexiones.map(c => c.split('-')[1]).join(',')}]` : '';
             btn.innerText = `${nodo.tipo}${textoConexiones}`;
             
             let esDisponible = false;
@@ -215,8 +217,12 @@ function dibujarMapa() {
                 if (nodoAnterior && nodoAnterior.conexiones.includes(nodo.id)) esDisponible = true;
             }
 
-            if (esDisponible) { btn.className += " disponible"; btn.onclick = () => iniciarNodo(nodo); } 
-            else { btn.disabled = true; }
+            if (esDisponible) { 
+                btn.className += " disponible"; 
+                btn.onclick = () => iniciarNodo(nodo); 
+            } else { 
+                btn.disabled = true; 
+            }
             filaDiv.appendChild(btn);
         });
         contenedor.appendChild(filaDiv);
