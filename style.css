@@ -21,11 +21,12 @@ h1 { color: #00ff66; margin: 5px 0; text-shadow: 0 0 10px rgba(0, 255, 102, 0.3)
     flex-direction: column-reverse; 
     gap: 15px; 
     margin-top: 15px; 
-    background-image: url('maps.png');
-    background-position: 250px 0; /* Centra la textura microscopic tile B de tu hoja */
+    /* Quitamos la imagen gigante repetida de fondo para que no tape los botones */
+    background-color: #05070a; 
     border: 2px solid #30363d;
     padding: 25px; 
     border-radius: 8px; 
+    position: relative;
 }
 
 .map-row { display: flex; justify-content: space-around; padding: 8px 0; }
@@ -41,7 +42,11 @@ h1 { color: #00ff66; margin: 5px 0; text-shadow: 0 0 10px rgba(0, 255, 102, 0.3)
     font-weight: bold; 
     font-family: inherit;
     font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
+
 .nodo-btn.disponible { border-color: #00ff66; color: #00ff66; box-shadow: 0 0 12px rgba(0,255,102,0.3); }
 .nodo-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -70,11 +75,12 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
 
 /* Tamaño de las miniaturas en el menú del mapa */
 .slot-sprite {
-    width: 110px;
-    height: 110px;
-    background-image: url('alfa.png');
+    width: 100px;
+    height: 100px;
     background-repeat: no-repeat;
-    image-rendering: pixelated; /* Evita que el pixel art se vuelva borroso */
+    image-rendering: pixelated;
+    /* Escalamos la imagen general para poder controlar los cuadrantes de tu archivo alfa.png */
+    background-size: 900px 900px; 
 }
 
 /* Tamaño de los sprites grandes en plena batalla */
@@ -83,6 +89,7 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
     height: 140px;
     background-repeat: no-repeat;
     image-rendering: pixelated;
+    background-size: 1100px 1100px;
 }
 
 /* Arena Frente a Frente */

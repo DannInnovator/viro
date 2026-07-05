@@ -94,10 +94,10 @@ let intervaloCombate = null;
 const TIPOS_NODOS = ["⚔️ Celula", "⚔️ Linfocito", "❓ Evento", "🏪 Lab"];
 
 function inicializarEquipoJugador() {
-    // Definimos las coordenadas de recorte (X e Y) basándonos en la imagen alfa.png que pasaste
+    // Ajuste de coordenadas exactas esquivando los títulos negros de la imagen
     miEquipoGlobal = [
-        new Personaje("Cepa Caparazón", 150, 9, 5, "tanque", "-15px -15px", "[Revestimiento] Fuerte vs Linfocitos.", "Revestimiento", "alfa.png"),
-        new Personaje("Cepa Alfa", 95, 26, 12, "agresivo", "-15px -525px", "[Lítico] Fuerte vs Células comunes.", "Litico", "alfa.png")
+        new Personaje("Cepa Caparazón", 150, 9, 5, "tanque", "-12px -35px", "[Revestimiento] Fuerte vs Linfocitos.", "Revestimiento", "alfa.png"),
+        new Personaje("Cepa Alfa", 95, 26, 12, "agresivo", "-12px -495px", "[Lítico] Fuerte vs Células comunes.", "Litico", "alfa.png")
     ];
     actualizarInterfazGestionEquipo();
 }
@@ -263,10 +263,10 @@ function iniciarNodo(nodo) {
         btnSalir.classList.add("hidden");
 
         // Coordenadas exactas mapeadas de tu hoja enemies.png
-        if (nodo.tipo === "👑 JEFE CEREBRO") enemigosActivos = [new Personaje("NÚCLEO CENTRAL", 250, 24, 6, "agresivo", "-10px -550px", "", "Ninguno", "enemies.png")];
-        else if (nodo.tipo === "⚔️ Linfocito") enemigosActivos = [new Personaje("Linfocito T", 80, 20, 11, "agresivo", "-10px -280px", "", "Linfocito", "enemies.png")];
-        else if (nodo.tipo === "❓ Evento") enemigosActivos = [new Personaje("Glóbulo Mutado", 55, 12, 4, "agresivo", "-400px -20px", "", "Celula", "enemies.png")];
-        else enemigosActivos = [new Personaje("Célula Epitelial", 70, 15, 8, "agresivo", "-10px -20px", "", "Celula", "enemies.png")];
+        if (nodo.tipo === "👑 JEFE CEREBRO") enemigosActivos = [new Personaje("NÚCLEO CENTRAL", 250, 24, 6, "agresivo", "-10px -590px", "", "Ninguno", "enemies.png")];
+        else if (nodo.tipo === "⚔️ Linfocito") enemigosActivos = [new Personaje("Linfocito T", 80, 20, 11, "agresivo", "-10px -295px", "", "Linfocito", "enemies.png")];
+        else if (nodo.tipo === "❓ Evento") enemigosActivos = [new Personaje("Glóbulo Mutado", 55, 12, 4, "agresivo", "-680px -15px", "", "Celula", "enemies.png")];
+        else enemigosActivos = [new Personaje("Célula Epitelial", 70, 15, 8, "agresivo", "-10px -15px", "", "Celula", "enemies.png")];
 
         if (miEquipoGlobal[0].nombre === "Cepa Caparazón" && miEquipoGlobal[0].estaVivo()) {
             miEquipoGlobal[0].escudo = 40;
