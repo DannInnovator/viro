@@ -147,7 +147,7 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
 /* Mueve el fondo horizontalmente para recorrer los 3 fotogramas de la fila */
 @keyframes jugarIdle {
     from { background-position-x: -5px; }
-    to { background-position-x: -390px; } /* Ajusta este número según el ancho de los 3 frames */
+    to { background-position-x: -400px; } /* Ajusta este número según el ancho de los 3 frames */
 }
 
 /* Hace que el sprite se desplace físicamente hacia adelante y vuelva */
