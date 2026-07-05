@@ -111,16 +111,59 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
     border: 1px solid #30363d;
 }
 
-/* --- RECORTE DE SPRITES ARENA DE COMBATE (Proporción Real Grande) --- */
+/* --- ARENA DE COMBATE (Base de los Sprites) --- */
 .sprite-battle {
-    width: 160px; /* Caja más grande para disfrutar el pixel art en la batalla */
+    width: 160px;
     height: 160px;
     background-repeat: no-repeat;
     image-rendering: pixelated;
-    /* Escalado proporcional grande para la arena */
-    background-size: 1000px 545px; 
+    background-size: 1000px 545px; /* Mantiene la proporción real que descubriste */
     background-color: #0a0d14;
     border-radius: 6px;
+    transition: transform 0.2s ease; /* Para efectos de sacudida */
+}
+
+/* --- ANIMACIONES DE ESTADO COMPARTIDAS --- */
+
+/* 1. Animación de Espera (Idle) - Hace que el bicho "respire" saltando 3 fotogramas */
+.anim-idle {
+    animation: jugarIdle 0.8s steps(3) infinite;
+}
+
+/* 2. Animación de Ataque (Efecto físico de arremetida) */
+.anim-atacar {
+    animation: arremetidaFisica 0.4s ease-in-out;
+}
+
+/* 3. Animación de Recibir Daño (Parpadeo rojo y sacudida) */
+.anim-herido {
+    animation: sacudidaSangrienta 0.3s ease-in-out;
+    filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5); /* Lo vuelve rojizo temporalmente */
+}
+
+
+/* --- 🎬 LOS KEYFRAMES (La matemática del movimiento) --- */
+
+/* Mueve el fondo horizontalmente para recorrer los 3 fotogramas de la fila */
+@keyframes jugarIdle {
+    from { background-position-x: -5px; }
+    to { background-position-x: -305px; } /* Ajusta este número según el ancho de los 3 frames */
+}
+
+/* Hace que el sprite se desplace físicamente hacia adelante y vuelva */
+@keyframes arremetidaFisica {
+    0% { transform: scale(1); }
+    50% { transform: translateX(25px) scale(1.05); } /* Si es el virus, avanza a la derecha */
+    100% { transform: translateX(0) scale(1); }
+}
+
+/* Hace que el personaje vibre violentamente al ser golpeado */
+@keyframes sacudidaSangrienta {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    50% { transform: translateX(8px); }
+    75% { transform: translateX(-4px); }
+    100% { transform: translateX(0); }
 }
 
 /* Arena Frente a Frente */

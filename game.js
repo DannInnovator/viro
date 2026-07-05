@@ -16,20 +16,28 @@ class Personaje {
     
     estaVivo() { return this.vidaActual > 0; }
     
-    recibirDaño(cantidad, imprimir) {
+    recibirDaño(cantidad, esVirus, imprimir) {
         if (this.escudo > 0) {
             if (cantidad <= this.escudo) { 
                 this.escudo -= cantidad; 
-                imprimir(`🛡️ El escudo de ${this.nombre} absorbió el impacto (${cantidad} dmg).`);
+                imprimir(`🛡️ El escudo de ${this.nombre} absorbió todo el impacto (${cantidad} dmg).`);
                 return; 
             } else { 
                 cantidad -= this.escudo; 
-                imprimir(`🛡️ El escudo de ${this.nombre} se rompió absorbiendo ${this.escudo} dmg.`);
+                imprimir(`🛡️ El escudo de ${this.nombre} se rompió mitigando ${this.escudo} de daño.`);
                 this.escudo = 0; 
             }
         }
         this.vidaActual = Math.max(0, this.vidaActual - cantidad);
-        imprimir(`💥 ${this.nombre} sufre ${cantidad} de daño. (Vida: ${this.vidaActual}/${this.vidaMax})`);
+        imprimir(`💥 ${this.nombre} sufre ${cantidad} de daño.`);
+
+        // --- EFECTO VISUAL: Disparar animación de Herido ---
+        const idElemento = esVirus ? "virus-render-sprite" : "enemigo-render-sprite";
+        const el = document.getElementById(idElemento);
+        if (el) {
+            el.classList.add("anim-herido");
+            setTimeout(() => el.classList.remove("anim-herido"), 300); // Se quita al terminar
+        }
     }
     
     ejecutarAccion(objetivo, aliadoEnCola, tipoCombate, imprimir) {
@@ -145,6 +153,11 @@ function actualizarInterfazVisual() {
         document.getElementById("virus-bar").style.width = `${pctVida}%`;
         let pctEscudo = Math.min(100, (virus.escudo / virus.vidaMax) * 100);
         document.getElementById("virus-shield-bar").style.width = `${pctEscudo}%`;
+        vSprite.style.backgroundImage = `url('${virus.spriteSheet}')`;
+        vSprite.style.backgroundPosition = virus.bgPos;
+        if (!vSprite.classList.contains("anim-atacar") && !vSprite.classList.contains("anim-herido")) {
+            vSprite.classList.add("anim-idle");
+        }
     } else {
         document.getElementById("virus-nombre").innerText = "Extinto";
         document.getElementById("virus-bar").style.width = `0%`;
@@ -164,6 +177,11 @@ function actualizarInterfazVisual() {
 
         let pctVidaEnemigo = (enemigo.vidaActual / enemigo.vidaMax) * 100;
         document.getElementById("enemigo-bar").style.width = `${pctVidaEnemigo}%`;
+        eSprite.style.backgroundImage = `url('${enemigo.spriteSheet}')`;
+        eSprite.style.backgroundPosition = enemigo.bgPos;
+        if (!eSprite.classList.contains("anim-atacar") && !eSprite.classList.contains("anim-herido")) {
+            eSprite.classList.add("anim-idle");
+        }
     } else {
         document.getElementById("enemigo-nombre").innerText = "Destruido";
         document.getElementById("enemigo-bar").style.width = `0%`;
@@ -314,9 +332,27 @@ function ejecutarUnTurno() {
     luchadores.forEach(luchador => {
         if (!luchador.estaVivo() || !enemigoFrente.estaVivo()) return;
         
-        if (luchador === virusFrente) {
+        // Identificar quién está atacando para ponerle la animación de arremetida
+        const esVirusAtacando = (luchador === virusFrente);
+        const idSpriteAtacante = esVirusAtacando ? "virus-render-sprite" : "enemigo-render-sprite";
+        const elAtacante = document.getElementById(idSpriteAtacante);
+
+        if (elAtacante) {
+            elAtacante.classList.remove("anim-idle");
+            elAtacante.classList.add("anim-atacar");
+            
+            // Al terminar el golpe, vuelve a su estado de respiración (Idle)
+            setTimeout(() => {
+                elAtacante.classList.remove("anim-atacar");
+                if (luchador.estaVivo()) elAtacante.classList.add("anim-idle");
+            }, 400);
+        }
+
+        if (esVirusAtacando) {
+            // El virus ataca al enemigo (pasamos false en recibirDaño porque el objetivo NO es el virus)
             luchador.ejecutarAccion(enemigoFrente, virusReserva, nodoTipoActual, logGame);
         } else {
+            // El enemigo ataca al virus (pasamos true en recibirDaño porque el objetivo SÍ es el virus)
             let dañoEnemigoBase = enemigoFrente.dañoBase;
             
             if (virusFrente.tipoBiologico === 'Revestimiento' && nodoTipoActual === '⚔️ Linfocito') {
@@ -329,7 +365,14 @@ function ejecutarUnTurno() {
                 enemigoFrente.dañoBase = Math.floor(dañoEnemigoBase * 1.3); 
             }
 
-            luchador.ejecutarAccion(virusFrente, null, "Ninguno", logGame);
+            // Modificamos la firma interna de ejecutarAccion para pasarle el flag de "esVirus" al recibir daño
+            imprimir = logGame; // Lógica interna adaptada
+            if (virusFrente.estaVivo()) {
+                let modAleatorio = 0.8 + (Math.random() * 0.4); 
+                let dañoFinal = Math.floor(enemigoFrente.dañoBase * modAleatorio);
+                logGame(`⚔️ <strong>${enemigoFrente.nombre}</strong> contraataca:`);
+                virusFrente.recibirDaño(dañoFinal, true, logGame); // True = El virus recibe el golpe
+            }
             enemigoFrente.dañoBase = dañoEnemigoBase; 
         }
         
