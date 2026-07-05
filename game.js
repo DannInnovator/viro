@@ -19,7 +19,7 @@ class Personaje {
         if (this.escudo > 0) {
             if (cantidad <= this.escudo) { 
                 this.escudo -= cantidad; 
-                imprimir(`🛡️ El escudo de ${this.nombre} absorbió el impacto (${cantidad} de daño).`);
+                imprimir(`🛡️ El escudo de ${this.nombre} absorbió todo el impacto (${cantidad} de daño).`);
                 return; 
             } else { 
                 cantidad -= this.escudo; 
@@ -37,19 +37,19 @@ class Personaje {
         let modAleatorio = 0.8 + (Math.random() * 0.4); 
         let dañoFinal = Math.floor(this.dañoBase * modAleatorio);
 
-        // --- SISTEMA DE TIPOS INTERACTIVO ---
+        // Sistema de tipos eficaz/poco eficaz
         if (this.tipoBiologico === 'Revestimiento' && tipoCombate === '⚔️ Linfocito') {
             dañoFinal = Math.floor(dañoFinal * 1.5);
-            imprimir(`<span style='color: #00ff66;'>⭐ ¡TIPO EFECTIVO! Las placas de Revestimiento quiebran las defensas del Linfocito.</span>`);
+            imprimir(`<span style='color: #00ff66;'>⭐ ¡TIPO EFECTIVO! El Revestimiento quiebra al Linfocito.</span>`);
         } else if (this.tipoBiologico === 'Revestimiento' && tipoCombate === '⚔️ Celula') {
             dañoFinal = Math.floor(dañoFinal * 0.7);
-            imprimir(`<span style='color: #ff3333;'>⚠️ Poco eficaz... El Revestimiento pesado se atasca en la membrana celular.</span>`);
+            imprimir(`<span style='color: #ff3333;'>⚠️ Poco eficaz... El Revestimiento es pesado contra células comunas.</span>`);
         } else if (this.tipoBiologico === 'Litico' && tipoCombate === '⚔️ Celula') {
             dañoFinal = Math.floor(dañoFinal * 1.5);
-            imprimir(`<span style='color: #00ff66;'>⭐ ¡TIPO EFECTIVO! El ARN-Lítico disuelve la célula común al instante.</span>`);
+            imprimir(`<span style='color: #00ff66;'>⭐ ¡TIPO EFECTIVO! El ARN-Lítico disuelve la célula.</span>`);
         } else if (this.tipoBiologico === 'Litico' && tipoCombate === '⚔️ Linfocito') {
             dañoFinal = Math.floor(dañoFinal * 0.7);
-            imprimir(`<span style='color: #ff3333;'>⚠️ Poco eficaz... El Linfocito neutraliza los ácidos líticos.</span>`);
+            imprimir(`<span style='color: #ff3333;'>⚠️ Poco eficaz... El Linfocito bloquea los ácidos.</span>`);
         }
 
         if (this.tipoEfecto === 'agresivo') {
@@ -64,7 +64,7 @@ class Personaje {
         else if (this.tipoEfecto === 'tanque') {
             imprimir(`🛡️ <strong>${this.nombre}</strong> golpea:`);
             objetivo.recibirDaño(dañoFinal, imprimir);
-            this.escudo = Math.floor(this.vidaActual * 0.25); // Buff de escudo
+            this.escudo = Math.floor(this.vidaActual * 0.25); 
             imprimir(`🛡️ ${this.nombre} regenera su barrera: +${this.escudo} de escudo.`);
 
             if (aliadoEnCola && aliadoEnCola.estaVivo()) {
@@ -75,10 +75,18 @@ class Personaje {
     }
 }
 
+// --- POOL DE MUTACIONES ---
+const LISTA_MUTACIONES = [
+    { nombre: "🧬 Púas de Proteína", desc: "Aumenta el daño base de AMBAS cepas en +4.", efecto: () => { miEquipoGlobal.forEach(v => v.dañoBase += 4); } },
+    { nombre: "🧪 Membrana de Titanio", desc: "Suma +30 HP de Vida Máxima a todo tu equipo.", efecto: () => { miEquipoGlobal.forEach(v => { v.vidaMax += 30; v.vidaActual += 30; }); } },
+    { nombre: "⚡ Flagelos Mutantes", desc: "Aumenta la velocidad base de tus virus en +3.", efecto: () => { miEquipoGlobal.forEach(v => { v.velocidadBase += 3; v.velocidad += 3; }); } },
+    { nombre: "💚 Regeneración Flash", desc: "Cura instantáneamente el 50% de la salud a todo el equipo.", efecto: () => { miEquipoGlobal.forEach(v => v.vidaActual = Math.min(v.vidaMax, v.vidaActual + Math.floor(v.vidaMax * 0.5))); } }
+];
+
 // --- VARIABLES DE CONTROL ---
 let pisoActual = 0;
 let nodoActualId = null;
-let nodoTipoActual = ""; // Guarda el tipo de nodo actual para calcular debilidades
+let nodoTipoActual = ""; 
 let mapaDatos = [];
 let miEquipoGlobal = []; 
 let enemigosActivos = [];
@@ -134,7 +142,7 @@ function actualizarInterfazVisual() {
 
     if (enemigo) {
         document.getElementById("enemigo-nombre").innerText = enemigo.nombre;
-        document.getElementById("card-chemigo") ? "" : document.getElementById("card-enemigo").querySelector(".actor-emoji").innerText = enemigo.emoji;
+        document.getElementById("card-enemigo").querySelector(".actor-emoji").innerText = enemigo.emoji; // ERROR REPARADO AQUÍ CORRECTAMENTE
         document.getElementById("enemigo-stats").innerText = `HP: ${enemigo.vidaActual}/${enemigo.vidaMax}`;
         let pctVidaEnemigo = (enemigo.vidaActual / enemigo.vidaMax) * 100;
         document.getElementById("enemigo-bar").style.width = `${pctVidaEnemigo}%`;
@@ -200,7 +208,7 @@ function iniciarNodo(nodo) {
     document.getElementById("pantalla-mapa").className = "screen hidden";
     document.getElementById("pantalla-combate").className = "screen";
     nodoActualId = nodo.id; 
-    nodoTipoActual = nodo.tipo; // Almacenamos el tipo globalmente
+    nodoTipoActual = nodo.tipo; 
     turnoGlobal = 1;
 
     const consola = document.getElementById("log-consola");
@@ -240,9 +248,7 @@ function iniciarNodo(nodo) {
         else if (nodo.tipo === "❓ Evento") enemigosActivos = [new Personaje("Glóbulo Mutado", 55, 12, 4, "agresivo", "☣️", "", "Celula")];
         else enemigosActivos = [new Personaje("Célula Epitelial", 70, 15, 8, "agresivo", "⚪", "", "Celula")];
 
-        // --- 💥 MECÁNICA: BUFF INICIAL AL TANQUE ---
-        // Si el virus que arranca al frente es el Tanque, le regalamos 40 de escudo de entrada
-        if (miEquipoGlobal[0].nombre === "Cepa Caparazón") {
+        if (miEquipoGlobal[0].nombre === "Cepa Caparazón" && miEquipoGlobal[0].estaVivo()) {
             miEquipoGlobal[0].escudo = 40;
             consola.innerHTML += `<p style='color: #58a6ff;'>🛡️ <strong>Pasiva de Entrada:</strong> Cepa Caparazón despliega blindaje pre-combate (+40 Escudo).</p>`;
         }
@@ -275,6 +281,8 @@ function ejecutarUnTurno() {
     let virusReserva = virusVivos[1] || null;
     let enemigoFrente = enemigosActivos[0];
 
+    virusFrente.escudo = (turnoGlobal === 1 && virusFrente.nombre === "Cepa Caparazón") ? virusFrente.escudo : 0;
+
     let luchadores = [virusFrente, enemigoFrente].sort((a, b) => b.velocidad - a.velocidad);
 
     luchadores.forEach(luchador => {
@@ -283,21 +291,20 @@ function ejecutarUnTurno() {
         if (luchador === virusFrente) {
             luchador.ejecutarAccion(enemigoFrente, virusReserva, nodoTipoActual, logGame);
         } else {
-            // --- REDUCCIÓN DE DAÑO RECIBIDO SEGÚN EL TIPO EN EL TURNO ENEMIGO ---
             let dañoEnemigoBase = enemigoFrente.dañoBase;
             
             if (virusFrente.tipoBiologico === 'Revestimiento' && nodoTipoActual === '⚔️ Linfocito') {
-                enemigoFrente.dañoBase = Math.floor(dañoEnemigoBase * 0.7); // Resistente
+                enemigoFrente.dañoBase = Math.floor(dañoEnemigoBase * 0.7); 
             } else if (virusFrente.tipoBiologico === 'Revestimiento' && nodoTipoActual === '⚔️ Celula') {
-                enemigoFrente.dañoBase = Math.floor(dañoEnemigoBase * 1.3); // Vulnerable
+                enemigoFrente.dañoBase = Math.floor(dañoEnemigoBase * 1.3); 
             } else if (virusFrente.tipoBiologico === 'Litico' && nodoTipoActual === '⚔️ Celula') {
-                enemigoFrente.dañoBase = Math.floor(dañoEnemigoBase * 0.7); // Resistente
+                enemigoFrente.dañoBase = Math.floor(dañoEnemigoBase * 0.7); 
             } else if (virusFrente.tipoBiologico === 'Litico' && nodoTipoActual === '⚔️ Linfocito') {
-                enemigoFrente.dañoBase = Math.floor(dañoEnemigoBase * 1.3); // Vulnerable
+                enemigoFrente.dañoBase = Math.floor(dañoEnemigoBase * 1.3); 
             }
 
             luchador.ejecutarAccion(virusFrente, null, "Ninguno", logGame);
-            enemigoFrente.dañoBase = dañoEnemigoBase; // Restaurar base
+            enemigoFrente.dañoBase = dañoEnemigoBase; 
         }
         
         if (!virusFrente.estaVivo()) {
@@ -313,9 +320,6 @@ function ejecutarUnTurno() {
         enemigosActivos.shift();
     }
 
-    // Al final del turno del virus, limpiamos su escudo para el que viene
-    if (virusFrente.estaVivo()) virusFrente.escudo = 0;
-
     actualizarInterfazVisual(); 
     virusVivos = miEquipoGlobal.filter(v => v.estaVivo());
     turnoGlobal++;
@@ -326,7 +330,7 @@ function ejecutarUnTurno() {
 
         if (enemigosActivos.length === 0) {
             logGame("<br><strong style='color: #00ff66;'>🏆 ¡Combate ganado! Cargando mutaciones...</strong>");
-            setTimeout(mostrarPantallaRecompensas, 1500); 
+            setTimeout(mostrarPantallaRecompensas, 1000); 
         } else {
             logGame("<br><strong style='color: #ff3333;'>💀 LA PLAGA FRACASÓ.</strong>");
             setTimeout(reiniciarJuegoTotal, 2500);
