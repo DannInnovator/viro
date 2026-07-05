@@ -28,10 +28,10 @@ h1 { color: #00ff66; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0, 255, 102,
 
 .hidden { display: none !important; }
 
-/* Estilos del Mapa estilo Roguelike */
+/* Estilos del Mapa */
 .map-grid {
     display: flex;
-    flex-direction: column-reverse; /* El piso 1 abajo, el jefe arriba */
+    flex-direction: column-reverse;
     gap: 15px;
     margin-top: 20px;
     background: #05070a;
@@ -69,24 +69,46 @@ h1 { color: #00ff66; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0, 255, 102,
     cursor: not-allowed;
 }
 
-/* Consola de Combate */
-button#btn-siguiente-turno {
+/* Controles de Combate */
+.controles-combate {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.btn-battle {
     background-color: #238636;
     color: white;
     border: none;
-    padding: 12px 24px;
-    font-radius: 6px;
+    padding: 12px 20px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
+}
+
+.btn-battle-fast {
+    background-color: #8957e5;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:disabled {
+    background-color: #30363d !important;
+    color: #8b949e;
+    cursor: not-allowed;
 }
 
 .console-box {
     background-color: #05070a;
     border: 1px solid #21262d;
     border-radius: 4px;
-    margin-top: 20px;
     padding: 15px;
-    height: 300px;
+    height: 320px;
     overflow-y: auto;
     text-align: left;
     font-size: 0.85rem;

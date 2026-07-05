@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viro.bee - MVP con Mapa</title>
+    <title>Viro.bee - MVP Evolucionado</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,14 +11,20 @@
         <h1>🦠 Viro.bee</h1>
         <p class="subtitle">Ecosistema de Juegos -bee</p>
         
+        <!-- PANTALLA 1: EL MAPA DE INFECCIÓN -->
         <div id="pantalla-mapa" class="screen">
             <h3>🗺️ Selecciona el siguiente tejido a infectar:</h3>
             <div id="mapa-nodos" class="map-grid"></div>
         </div>
 
+        <!-- PANTALLA 2: LA ARENA DE COMBATE / EVENTOS -->
         <div id="pantalla-combate" class="screen hidden">
             <div class="battle-arena">
-                <button id="btn-siguiente-turno">⏳ AVANZAR TURNO</button>
+                <div class="controles-combate">
+                    <button id="btn-velocidad-1x" class="btn-battle">⏳ AUTO 1X</button>
+                    <button id="btn-velocidad-3x" class="btn-battle-fast">⚡ AUTO 3X (Rápido)</button>
+                    <button id="btn-salir-nodo" class="btn-battle hidden">➔ VOLVER AL MAPA</button>
+                </div>
                 <div id="log-consola" class="console-box"></div>
             </div>
         </div>
