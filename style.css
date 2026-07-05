@@ -113,13 +113,13 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
 
 /* --- ARENA DE COMBATE (Base de los Sprites) --- */
 .sprite-battle {
-    width: 160px;
-    height: 160px;
+    width: 130px;
+    height: 130px;
     background-repeat: no-repeat;
     image-rendering: pixelated;
-    background-size: 1000px 545px; /* Mantiene la proporción real que descubriste */
+    background-size: 1300px 713px; /* Mantiene la proporción real que descubriste */
     background-color: #0a0d14;
-    border-radius: 6px;
+    border-radius: 4px;
     transition: transform 0.2s ease; /* Para efectos de sacudida */
 }
 
