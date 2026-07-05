@@ -100,24 +100,25 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
 
 /* Tamaño de las miniaturas en el menú del mapa */
 .slot-sprite {
-    width: 100px;
-    height: 100px;
+    width: 130px;  /* Agrandamos un pelín la caja para que quepa bien el bicho escalado */
+    height: 130px;
     background-repeat: no-repeat;
     image-rendering: pixelated;
-    background-size: 900px 900px; 
-    /* Truco: un color de fondo plano oculta la cuadrícula gris de la imagen */
+    /* Escalamos de forma proporcional a la resolución real (Proporción aproximada para los slots) */
+    background-size: 800px 436px; 
     background-color: #161b22; 
     border-radius: 4px;
     border: 1px solid #30363d;
 }
 
-/* Arena de Combate */
+/* --- RECORTE DE SPRITES ARENA DE COMBATE (Proporción Real Grande) --- */
 .sprite-battle {
-    width: 140px;
-    height: 140px;
+    width: 160px; /* Caja más grande para disfrutar el pixel art en la batalla */
+    height: 160px;
     background-repeat: no-repeat;
     image-rendering: pixelated;
-    background-size: 1100px 1100px;
+    /* Escalado proporcional grande para la arena */
+    background-size: 1000px 545px; 
     background-color: #0a0d14;
     border-radius: 6px;
 }
