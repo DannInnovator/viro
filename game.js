@@ -7,8 +7,8 @@ class Personaje {
         this.velocidadBase = velocidad;
         this.velocidad = velocidad;
         this.tipoEfecto = tipoEfecto; 
-        this.bgPos = bgPos; // Coordenada X e Y para Idle
-        this.diePos = diePos; // Coordenada X para el inicio de la fila Die
+        this.bgPos = bgPos; 
+        this.diePos = diePos; 
         this.desc = desc;
         this.tipoBiologico = tipoBiologico; 
         this.spriteSheet = spriteSheet; 
@@ -106,7 +106,6 @@ let intervaloCombate = null;
 const TIPOS_NODOS = ["⚔️ Celula", "⚔️ Linfocito", "❓ Evento", "🏪 Lab"];
 
 function inicializarEquipoJugador() {
-    // Registramos la posición inicial X de la animación Idle e inyectamos la posición X del frame DIE
     miEquipoGlobal = [
         new Personaje("Cepa Caparazón", 150, 9, 5, "tanque", "-8px -40px", "-788px", "[Revestimiento] Fuerte vs Linfocitos.", "Revestimiento", "alfa.png"),
         new Personaje("Cepa Alfa", 95, 26, 12, "agresivo", "-8px -395px", "-788px", "[Lítico] Fuerte vs Células comunes.", "Litico", "alfa.png")
@@ -117,17 +116,20 @@ function inicializarEquipoJugador() {
 function actualizarInterfazGestionEquipo() {
     if (miEquipoGlobal.length < 2) return;
     
-    document.getElementById("slot-0-nombre").innerText = miEquipoGlobal[0].nombre;
-    document.getElementById("slot-0-desc").innerText = miEquipoGlobal[0].desc;
-    let s0 = document.getElementById("slot-0-sprite");
-    s0.style.backgroundImage = `url('${miEquipoGlobal[0].spriteSheet}')`;
-    s0.style.backgroundPosition = miEquipoGlobal[0].bgPos;
+    // Asignar nombres, descripciones y sprites en la gestión del mapa
+    for (let i = 0; i < 2; i++) {
+        document.getElementById(`slot-${i}-nombre`).innerText = miEquipoGlobal[i].nombre;
+        document.getElementById(`slot-${i}-desc`).innerText = miEquipoGlobal[i].desc;
+        
+        let s = document.getElementById(`slot-${i}-sprite`);
+        s.style.backgroundImage = `url('${miEquipoGlobal[i].spriteSheet}')`;
+        s.style.backgroundPosition = miEquipoGlobal[i].bgPos;
 
-    document.getElementById("slot-1-nombre").innerText = miEquipoGlobal[1].nombre;
-    document.getElementById("slot-1-desc").innerText = miEquipoGlobal[1].desc;
-    let s1 = document.getElementById("slot-1-sprite");
-    s1.style.backgroundImage = `url('${miEquipoGlobal[1].spriteSheet}')`;
-    s1.style.backgroundPosition = miEquipoGlobal[1].bgPos;
+        // --- 🔄 PROGRAMACIÓN DE LAS BARRAS EN EL MAPA ---
+        let pctVidaMapa = (miEquipoGlobal[i].vidaActual / miEquipoGlobal[i].vidaMax) * 100;
+        document.getElementById(`slot-${i}-hp-bar`).style.width = `${pctVidaMapa}%`;
+        document.getElementById(`slot-${i}-hp-text`).innerText = `HP: ${miEquipoGlobal[i].vidaActual}/${miEquipoGlobal[i].vidaMax}`;
+    }
 }
 
 document.getElementById("btn-invertir-orden").addEventListener("click", () => {
@@ -151,7 +153,6 @@ function actualizarInterfazVisual() {
         vSprite.style.backgroundImage = `url('${virus.spriteSheet}')`;
         vSprite.style.backgroundPosition = virus.bgPos;
 
-        // Pasamos las variables dinámicas al CSS para que calcule los saltos de frames
         let posX = virus.bgPos.split(' ')[0];
         vSprite.style.setProperty('--base-x', posX);
         vSprite.style.setProperty('--die-x', virus.diePos);
@@ -164,6 +165,10 @@ function actualizarInterfazVisual() {
         if (!vSprite.classList.contains("anim-atacar") && !vSprite.classList.contains("anim-herido") && !vSprite.classList.contains("anim-muerte")) {
             vSprite.className = "sprite-battle anim-idle";
         }
+    } else {
+        document.getElementById("virus-nombre").innerText = "Extinto";
+        document.getElementById("virus-bar").style.width = `0%`;
+        document.getElementById("virus-shield-bar").style.width = `0%`;
     }
 
     let eSprite = document.getElementById("enemigo-render-sprite");
@@ -185,6 +190,9 @@ function actualizarInterfazVisual() {
         if (!eSprite.classList.contains("anim-atacar") && !eSprite.classList.contains("anim-herido") && !eSprite.classList.contains("anim-muerte")) {
             eSprite.className = "sprite-battle anim-idle";
         }
+    } else {
+        document.getElementById("enemigo-nombre").innerText = "Destruido";
+        document.getElementById("enemigo-bar").style.width = `0%`;
     }
 }
 
@@ -283,8 +291,7 @@ function iniciarNodo(nodo) {
         btn3x.disabled = false;
         btnSalir.classList.add("hidden");
 
-        // Mapeo exacto de coordenadas Y y posiciones de muerte de enemies.png
-        if (nodo.tipo === "👑 JEFE CEREBRO") enemigosActivos = [new Personaje("NÚCLEO CENTRAL", 250, 24, 6, "agresivo", "-8px -395px", "-788px", "", "Ninguno", "enemies.png")];
+        if (nodo.tipo === "👑 JEFE CEREBRO") enemigosActivos = [new Personaje("NÚCLEO CENTRAL", 240, 24, 6, "agresivo", "-8px -395px", "-788px", "", "Ninguno", "enemies.png")];
         else if (nodo.tipo === "⚔️ Linfocito") enemigosActivos = [new Personaje("Linfocito T", 80, 20, 11, "agresivo", "-8px -220px", "-788px", "", "Linfocito", "enemies.png")];
         else if (nodo.tipo === "❓ Evento") enemigosActivos = [new Personaje("Glóbulo Mutado", 55, 12, 4, "agresivo", "-8px -565px", "-788px", "", "Celula", "enemies.png")];
         else enemigosActivos = [new Personaje("Célula Epitelial", 70, 15, 8, "agresivo", "-8px -40px", "-788px", "", "Celula", "enemies.png")];
@@ -294,7 +301,6 @@ function iniciarNodo(nodo) {
             consola.innerHTML += `<p style='color: #58a6ff;'>🛡️ <strong>Pasiva de Entrada:</strong> Desplegando blindaje pre-combate (+40 Escudo).</p>`;
         }
 
-        // Limpiar clases de estados de la ronda anterior
         document.getElementById("virus-render-sprite").className = "sprite-battle";
         document.getElementById("enemigo-render-sprite").className = "sprite-battle";
 
@@ -369,13 +375,19 @@ function ejecutarUnTurno() {
         }
     });
 
-    // --- 💀 CONTROL DE ANIMACIONES DE MUERTE INTEGRADO ---
+    // --- 📊 PASO 1 CORREGIDO: Actualizamos las barras numéricas e interfaces ANTES del descarte ---
+    actualizarInterfazVisual();
+
+    // --- 💀 PASO 2 CORREGIDO: Flujo de Muerte Asíncrono Estable ---
+    let flagFinalizado = false;
+
     if (!virusFrente.estaVivo()) {
         const vEl = document.getElementById("virus-render-sprite");
         if (vEl && !vEl.classList.contains("anim-muerte")) {
             vEl.className = "sprite-battle anim-muerte";
         }
-        logGame(`<span style='color: #ff3333;'>💀 ${virusFrente.nombre} colapsó.</span>`);
+        logGame(`<span style='color: #ff3333;'>💀 ${virusFrente.nombre} colapsó. Siguiente cepa al frente.</span>`);
+        flagFinalizado = true;
     }
     
     if (!enemigoFrente.estaVivo()) {
@@ -384,34 +396,47 @@ function ejecutarUnTurno() {
             eEl.className = "sprite-battle anim-muerte";
         }
         logGame(`<span style='color: #ff3333;'>💀 ${enemigoFrente.nombre} desintegrado.</span>`);
+        flagFinalizado = true;
     }
 
-    // Retardamos un instante la limpieza física de los arrays para permitir ver los frames de muerte
-    setTimeout(() => {
-        if (!virusFrente.estaVivo() && miEquipoGlobal.includes(virusFrente)) {
-            miEquipoGlobal.shift();
-            actualizarInterfazVisual();
-        }
-        if (!enemigoFrente.estaVivo() && enemigosActivos.includes(enemigoFrente)) {
-            enemigosActivos.shift();
-            actualizarInterfazVisual();
-        }
-    }, 500);
-
-    virusVivos = miEquipoGlobal.filter(v => v.estaVivo());
-    turnoGlobal++;
-
-    if (enemigosActivos.length === 0 || virusVivos.length === 0) {
+    // Si hubo una baja, pausamos el bucle, esperamos los frames de la animación y luego procesamos los datos
+    if (flagFinalizado) {
         clearInterval(intervaloCombate);
         intervaloCombate = null;
 
-        if (enemigosActivos.length === 0) {
-            logGame("<br><strong style='color: #00ff66;'>🏆 ¡Combate ganado! Cargando mutaciones...</strong>");
-            setTimeout(mostrarPantallaRecompensas, 1200); 
-        } else {
-            logGame("<br><strong style='color: #ff3333;'>💀 LA PLAGA FRACASÓ.</strong>");
-            setTimeout(reiniciarJuegoTotal, 2500);
+        setTimeout(() => {
+            if (!virusFrente.estaVivo()) miEquipoGlobal.shift();
+            if (!enemigoFrente.estaVivo()) enemigosActivos.shift();
+
+            actualizarInterfazVisual(); 
+            evaluarFinDelCombate(logGame);
+        }, 550);
+    } else {
+        // Combate normal continúa sin bajas
+        virusVivos = miEquipoGlobal.filter(v => v.estaVivo());
+        turnoGlobal++;
+
+        if (enemigosActivos.length === 0 || virusVivos.length === 0) {
+            clearInterval(intervaloCombate);
+            intervaloCombate = null;
+            evaluarFinDelCombate(logGame);
         }
+    }
+}
+
+function evaluarFinDelCombate(logGame) {
+    let virusVivos = miEquipoGlobal.filter(v => v.estaVivo());
+
+    if (enemigosActivos.length === 0) {
+        logGame("<br><strong style='color: #00ff66;'>🏆 ¡Combate ganado! Cargando mutaciones...</strong>");
+        setTimeout(mostrarPantallaRecompensas, 1000); 
+    } else if (virusVivos.length === 0) {
+        logGame("<br><strong style='color: #ff3333;'>💀 LA PLAGA FRACASÓ.</strong>");
+        setTimeout(reiniciarJuegoTotal, 2500);
+    } else {
+        // Si el virus de adelante murió pero queda otro vivo en reserva, reanudamos el bucle automático
+        const velocidadMs = document.getElementById("btn-velocidad-3x").disabled ? 333 : 1000;
+        comenzarBucle(velocidadMs);
     }
 }
 

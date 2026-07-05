@@ -189,3 +189,27 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
 .versus { font-weight: bold; font-size: 1.2rem; color: #ff3333; }
 
 .console-box-mini { background-color: #05070a; border: 1px solid #21262d; border-radius: 4px; padding: 10px; height: 110px; overflow-y: auto; text-align: left; font-size: 0.8rem; color: #8b949e; }
+
+/* --- ESTILOS DE BARRAS DE SALUD PARA EL MAPA --- */
+.health-bar-container-map {
+    width: 80%;
+    background-color: #21262d;
+    height: 8px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 6px auto 2px auto;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.health-bar-map {
+    background-color: #00ff66;
+    height: 100%;
+    width: 100%; /* Controlado dinámicamente por JS */
+    transition: width 0.3s ease;
+}
+
+.slot-hp-text {
+    font-size: 0.75rem;
+    color: #8b949e;
+    margin-bottom: 5px;
+}
