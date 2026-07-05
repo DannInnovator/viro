@@ -100,11 +100,10 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
 
 /* Tamaño de las miniaturas en el menú del mapa */
 .slot-sprite {
-    width: 130px;  /* Agrandamos un pelín la caja para que quepa bien el bicho escalado */
+    width: 130px; 
     height: 130px;
     background-repeat: no-repeat;
     image-rendering: pixelated;
-    /* Escalamos de forma proporcional a la resolución real (Proporción aproximada para los slots) */
     background-size: 1300px 713px; 
     background-color: #161b22; 
     border-radius: 4px;
@@ -117,15 +116,15 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
     height: 130px;
     background-repeat: no-repeat;
     image-rendering: pixelated;
-    background-size: 1300px 713px; /* Mantiene la proporción real que descubriste */
+    background-size: 1300px 713px; 
     background-color: #0a0d14;
     border-radius: 4px;
-    transition: transform 0.2s ease; /* Para efectos de sacudida */
+    transition: transform 0.2s ease; 
 }
 
 /* --- ANIMACIONES DE ESTADO COMPARTIDAS --- */
 
-/* 1. Animación de Espera (Idle) - Hace que el bicho "respire" saltando 3 fotogramas */
+/* 1. Animación de Espera (Idle) - Salta 3 fotogramas horizontales de 130px */
 .anim-idle {
     animation: jugarIdle 0.8s steps(3) infinite;
 }
@@ -135,10 +134,15 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
     animation: arremetidaFisica 0.4s ease-in-out;
 }
 
-/* 3. Animación de Recibir Daño (Parpadeo rojo y sacudida) */
+/* 3. Animación de Recibir Daño (Parpadeo y sacudida) */
 .anim-herido {
     animation: sacudidaSangrienta 0.3s ease-in-out;
-    filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5); /* Lo vuelve rojizo temporalmente */
+    filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5); 
+}
+
+/* 4. Animación de Muerte (Die) - Recorre 2 fotogramas finales y se congela en el último */
+.anim-muerte {
+    animation: jugarMuerte 0.5s steps(2) forwards;
 }
 
 
@@ -148,6 +152,12 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
 @keyframes jugarIdle {
     from { background-position-x: -5px; }
     to { background-position-x: -415px; } /* Ajusta este número según el ancho de los 3 frames */
+}
+
+/* Desplazamiento horizontal para la muerte de 2 frames (130px * 2 = 260px) */
+@keyframes jugarMuerte {
+    from { background-position-x: var(--die-x); }
+    to { background-position-x: calc(var(--die-x) - 260px); }
 }
 
 /* Hace que el sprite se desplace físicamente hacia adelante y vuelva */
@@ -160,9 +170,9 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
 /* Hace que el personaje vibre violentamente al ser golpeado */
 @keyframes sacudidaSangrienta {
     0% { transform: translateX(0); }
-    25% { transform: translateX(-8px); }
-    50% { transform: translateX(8px); }
-    75% { transform: translateX(-4px); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-3px); }
     100% { transform: translateX(0); }
 }
 
