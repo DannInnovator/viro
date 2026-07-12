@@ -153,9 +153,13 @@ function actualizarInterfazVisual() {
         vSprite.style.backgroundImage = `url('${virus.spriteSheet}')`;
         vSprite.style.backgroundPosition = virus.bgPos;
 
+        // Busca esto en tu actualizarInterfazVisual() dentro de game.js
         let posX = virus.bgPos.split(' ')[0];
+        let posY = virus.bgPos.split(' ')[1]; // 🌟 Extraemos la Y actual del reposo
+
         vSprite.style.setProperty('--base-x', posX);
         vSprite.style.setProperty('--die-x', virus.diePos);
+        vSprite.style.setProperty('--die-y', posY); // 🌟 Le pasamos la Y al CSS de muerte automáticamente
 
         let pctVida = (virus.vidaActual / virus.vidaMax) * 100;
         document.getElementById("virus-bar").style.width = `${pctVida}%`;

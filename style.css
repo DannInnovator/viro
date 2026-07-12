@@ -156,8 +156,14 @@ button:disabled { background-color: #30363d !important; color: #8b949e; cursor: 
 
 /* Desplazamiento horizontal para la muerte de 2 frames (130px * 2 = 260px) */
 @keyframes jugarMuerte {
-    from { background-position-x: var(--die-x); }
-    to { background-position-x: calc(var(--die-x) - 276px); }
+    from { 
+        background-position-x: var(--die-x); 
+        background-position-y: var(--die-y); /* 🎛️ Controlamos la altura de inicio */
+    }
+    to { 
+        background-position-x: calc(var(--die-x) - 260px); 
+        background-position-y: var(--die-y); /* 🎛️ Mantiene la altura fija durante el salto */
+    }
 }
 
 /* Hace que el sprite se desplace físicamente hacia adelante y vuelva */
